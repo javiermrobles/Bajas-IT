@@ -5,13 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+```
 <title>Confirmar baja - IT</title>
 
-<!-- Microsoft Authentication Library -->
-<script
-    src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"
-    type="text/javascript">
-</script>
+<!--
+    ============================================================
+    MICROSOFT MSAL
+    ============================================================
+
+    IMPORTANTE:
+    Para máxima estabilidad en GitHub Pages te recomiendo
+    descargar este archivo y guardarlo en:
+
+    Bajas-IT/
+    └── Bajas/
+        ├── confirmar.html
+        └── msal-browser.min.js
+
+    Entonces cambia el src por:
+
+    <script src="./msal-browser.min.js"></script>
+
+    De momento utilizamos el CDN oficial de Microsoft.
+-->
+<script src="./msal-browser.min.js"></script>
 
 <style>
     * {
@@ -281,6 +298,17 @@
         color: #98A2B3;
     }
 
+    .debug {
+        margin-top: 20px;
+        padding: 12px;
+        background: #F9FAFB;
+        border: 1px solid #EAECF0;
+        border-radius: 6px;
+        font-size: 11px;
+        color: #667085;
+        word-break: break-all;
+    }
+
     @media (max-width: 600px) {
         .container {
             margin: 20px auto;
@@ -313,6 +341,7 @@
         }
     }
 </style>
+```
 
 </head>
 
@@ -321,11 +350,13 @@
 <div class="container">
     <div class="card">
 
+```
     <!-- CABECERA -->
     <div class="header">
         <h1>Procedimiento de baja</h1>
         <p>Gestión de bajas · Equipo de IT</p>
     </div>
+
 
     <!-- LOGIN -->
     <div id="loginSection" class="content">
@@ -348,12 +379,17 @@
             class="btn-login"
             type="button"
             onclick="login()">
+
             INICIAR SESIÓN CON MICROSOFT 365
+
         </button>
 
         <div id="loginError" class="error hidden"></div>
 
+        <div id="debugInfo" class="debug hidden"></div>
+
     </div>
+
 
     <!-- CONFIRMACIÓN -->
     <div id="confirmationSection" class="content hidden">
@@ -369,6 +405,7 @@
                 Revisa cuidadosamente la información antes de continuar.
             </div>
         </div>
+
 
         <div class="section-title">
             Información del usuario
@@ -406,6 +443,7 @@
 
         </div>
 
+
         <div class="section-title">
             Usuario que ejecuta la operación
         </div>
@@ -417,6 +455,7 @@
             </div>
 
             <div class="executor-user">
+
                 <strong id="executorName">
                     Cargando...
                 </strong>
@@ -426,9 +465,11 @@
                 <span id="executorEmail">
                     Cargando...
                 </span>
+
             </div>
 
         </div>
+
 
         <div class="warning">
 
@@ -450,6 +491,7 @@
 
         </div>
 
+
         <div class="buttons">
 
             <button
@@ -457,7 +499,9 @@
                 class="btn-cancel"
                 type="button"
                 onclick="cancelar()">
+
                 CANCELAR
+
             </button>
 
             <button
@@ -465,7 +509,9 @@
                 class="btn-confirm"
                 type="button"
                 onclick="confirmarBaja()">
+
                 PROCEDER CON LA BAJA
+
             </button>
 
         </div>
@@ -473,6 +519,7 @@
         <div id="actionError" class="error hidden"></div>
 
     </div>
+
 
     <!-- LOADING -->
     <div id="loadingSection" class="loading hidden">
@@ -487,6 +534,7 @@
         </div>
 
     </div>
+
 
     <!-- SUCCESS -->
     <div id="successSection" class="success hidden">
@@ -518,26 +566,24 @@
 
     </div>
 
+
     <!-- FOOTER -->
     <div class="footer">
         Sistema interno de gestión de bajas · Equipo de IT
     </div>
 
 </div>
+```
 
 </div>
 
 <script>
 
-    console.log("====================================");
-    console.log("INICIANDO CONFIRMAR.HTML");
-    console.log("====================================");
-
     /*
-     * ==========================================================
-     * CONFIGURACIÓN MICROSOFT ENTRA ID
-     * ==========================================================
-     */
+    ============================================================
+    CONFIGURACIÓN MICROSOFT ENTRA ID
+    ============================================================
+    */
 
     const msalConfig = {
 
@@ -549,8 +595,21 @@
             authority:
                 "https://login.microsoftonline.com/11d5bb73-8e25-45bd-85f3-932b3e22cafc",
 
+            /*
+             * MUY IMPORTANTE:
+             * Debe coincidir exactamente con la URL registrada
+             * en Microsoft Entra.
+             *
+             * En local:
+             * http://localhost:5500/confirmar.html
+             *
+             * En producción:
+             * https://javiermrobles.github.io/Bajas-IT/Bajas/confirmar.html
+             */
+
             redirectUri:
-                window.location.origin + window.location.pathname
+                window.location.origin +
+                window.location.pathname
 
         },
 
@@ -572,78 +631,90 @@
 
 
     /*
-     * ==========================================================
-     * MSAL
-     * ==========================================================
-     */
+    ============================================================
+    MSAL
+    ============================================================
+    */
 
     let msalInstance = null;
 
     let executorAccount = null;
 
-    let procesandoRespuestaMSAL = false;
+    let msalReady = false;
 
 
     /*
-     * ==========================================================
-     * DATOS DE LA BAJA
-     *
-     * IMPORTANTE:
-     *
-     * Estos datos deben venir en la URL ANTES del #.
-     *
-     * Ejemplo:
-     *
-     * confirmar.html?id=123&nombre=Juan&email=juan@empresa.com&fecha=2026-08-11
-     *
-     * Microsoft utiliza el # para devolver su respuesta OAuth.
-     * ==========================================================
-     */
+    ============================================================
+    DATOS DE LA URL
+    ============================================================
+
+    IMPORTANTE:
+
+    Los datos originales deben venir en:
+
+    confirmar.html?id=XXX&nombre=XXX&email=XXX&fecha=XXX
+
+    El #code=... que añade Microsoft NO contiene esos parámetros.
+    ============================================================
+    */
 
     const params =
-        new URLSearchParams(window.location.search);
+        new URLSearchParams(
+            window.location.search
+        );
 
-    let targetUserId =
+
+    const targetUserId =
         params.get("id");
 
-    let targetUserName =
+
+    const targetUserName =
         params.get("nombre");
 
-    let targetUserEmail =
+
+    const targetUserEmail =
         params.get("email");
 
-    let targetTerminationDate =
+
+    const targetTerminationDate =
         params.get("fecha");
 
 
     /*
-     * ==========================================================
-     * MOSTRAR DATOS
-     * ==========================================================
-     */
+    ============================================================
+    MOSTRAR DATOS
+    ============================================================
+    */
 
     function mostrarDatosUsuario() {
 
         document.getElementById("userName").textContent =
-            targetUserName || "No especificado";
+            targetUserName ||
+            "No especificado";
+
 
         document.getElementById("userEmail").textContent =
-            targetUserEmail || "No especificado";
+            targetUserEmail ||
+            "No especificado";
+
 
         document.getElementById("userId").textContent =
-            targetUserId || "No especificado";
+            targetUserId ||
+            "No especificado";
+
 
         document.getElementById("terminationDate").textContent =
-            targetTerminationDate || "Pendiente";
+            targetTerminationDate ||
+            "Pendiente";
 
     }
 
 
     /*
-     * ==========================================================
-     * MOSTRAR EJECUTOR
-     * ==========================================================
-     */
+    ============================================================
+    MOSTRAR EJECUTOR
+    ============================================================
+    */
 
     function mostrarUsuarioEjecutor(account) {
 
@@ -651,9 +722,12 @@
             return;
         }
 
+
         document.getElementById("executorName").textContent =
             account.name ||
+            account.username ||
             "Usuario";
+
 
         document.getElementById("executorEmail").textContent =
             account.username ||
@@ -663,22 +737,29 @@
 
 
     /*
-     * ==========================================================
-     * MOSTRAR ERROR
-     * ==========================================================
-     */
+    ============================================================
+    MOSTRAR ERROR
+    ============================================================
+    */
 
     function mostrarError(elementId, mensaje) {
 
         const element =
             document.getElementById(elementId);
 
+
         if (!element) {
+
             console.error(mensaje);
+
             return;
+
         }
 
-        element.textContent = mensaje;
+
+        element.textContent =
+            mensaje;
+
 
         element.classList.remove("hidden");
 
@@ -686,83 +767,67 @@
 
 
     /*
-     * ==========================================================
-     * MOSTRAR SECCIÓN DE CONFIRMACIÓN
-     * ==========================================================
-     */
-
-    function mostrarConfirmacion() {
-
-        mostrarDatosUsuario();
-
-        document
-            .getElementById("loginSection")
-            .classList.add("hidden");
-
-        document
-            .getElementById("confirmationSection")
-            .classList.remove("hidden");
-
-    }
-
-
-    /*
-     * ==========================================================
-     * INICIALIZAR MSAL
-     * ==========================================================
-     */
+    ============================================================
+    INICIALIZAR MSAL
+    ============================================================
+    */
 
     async function inicializarMSAL() {
 
-        if (msalInstance) {
-            return msalInstance;
-        }
-
         console.log("Inicializando MSAL...");
+
+        console.log(
+            "typeof msal:",
+            typeof msal
+        );
+
 
         if (typeof msal === "undefined") {
 
             throw new Error(
-                "MSAL no está cargado. Comprueba que el CDN de Microsoft sea accesible."
+                "MSAL no está cargado. " +
+                "El navegador no ha podido cargar la librería de Microsoft."
             );
 
         }
 
-        console.log("typeof msal:", typeof msal);
 
         msalInstance =
-            new msal.PublicClientApplication(msalConfig);
+            new msal.PublicClientApplication(
+                msalConfig
+            );
+
+
+        /*
+         * MSAL 2.35 requiere initialize()
+         * antes de utilizar la instancia.
+         */
 
         if (
-            typeof msalInstance.initialize === "function"
+            typeof msalInstance.initialize ===
+            "function"
         ) {
 
             await msalInstance.initialize();
 
         }
 
-        console.log("✅ MSAL inicializado correctamente.");
 
-        return msalInstance;
+        msalReady = true;
+
+
+        console.log(
+            "✅ MSAL inicializado correctamente."
+        );
 
     }
 
 
     /*
-     * ==========================================================
-     * PROCESAR RESPUESTA DE REDIRECT
-     *
-     * ESTA ES LA PARTE IMPORTANTE.
-     *
-     * Si Microsoft devuelve:
-     *
-     * confirmar.html#code=...
-     *
-     * NO hacemos loginPopup().
-     *
-     * MSAL procesa el resultado con handleRedirectPromise().
-     * ==========================================================
-     */
+    ============================================================
+    PROCESAR RESPUESTA DEL REDIRECT
+    ============================================================
+    */
 
     async function procesarRespuestaMSAL() {
 
@@ -770,21 +835,29 @@
             return;
         }
 
-        console.log("Procesando respuesta MSAL...");
+
+        console.log(
+            "Procesando respuesta MSAL..."
+        );
+
 
         try {
 
             const response =
                 await msalInstance.handleRedirectPromise();
 
+
             if (response) {
 
                 console.log(
-                    "✅ Respuesta de Microsoft recibida."
+                    "✅ Login completado mediante redirect.",
+                    response.account
                 );
+
 
                 executorAccount =
                     response.account;
+
 
                 if (executorAccount) {
 
@@ -792,52 +865,88 @@
                         executorAccount
                     );
 
-                    mostrarUsuarioEjecutor(
-                        executorAccount
-                    );
-
-                    mostrarConfirmacion();
-
                 }
-
-                return;
 
             }
 
+
             /*
-             * No hay respuesta OAuth.
-             * Comprobamos si ya existe una sesión.
+             * Si no hay respuesta nueva, comprobar
+             * si ya existe una cuenta en sesión.
              */
 
-            const accounts =
-                msalInstance.getAllAccounts();
+            if (!executorAccount) {
 
-            console.log(
-                "Cuentas MSAL:",
-                accounts.length
-            );
+                const accounts =
+                    msalInstance.getAllAccounts();
 
-            if (
-                accounts &&
-                accounts.length > 0
-            ) {
 
-                executorAccount =
-                    accounts[0];
+                if (
+                    accounts &&
+                    accounts.length > 0
+                ) {
 
-                msalInstance.setActiveAccount(
-                    executorAccount
-                );
+                    executorAccount =
+                        accounts[0];
+
+
+                    msalInstance.setActiveAccount(
+                        executorAccount
+                    );
+
+                }
+
+            }
+
+
+            /*
+             * Si tenemos usuario autenticado,
+             * mostrar directamente la pantalla
+             * de confirmación.
+             */
+
+            if (executorAccount) {
 
                 mostrarUsuarioEjecutor(
                     executorAccount
                 );
 
-                mostrarConfirmacion();
+
+                mostrarDatosUsuario();
+
+
+                document
+                    .getElementById("loginSection")
+                    .classList.add("hidden");
+
+
+                document
+                    .getElementById("confirmationSection")
+                    .classList.remove("hidden");
+
+
+                /*
+                 * Limpiamos el hash #code=...
+                 * de la barra del navegador.
+                 */
+
+                if (
+                    window.location.hash
+                ) {
+
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        window.location.pathname +
+                        window.location.search
+                    );
+
+                }
 
             }
 
         }
+
         catch (error) {
 
             console.error(
@@ -845,10 +954,11 @@
                 error
             );
 
+
             mostrarError(
                 "loginError",
-                "No se ha podido completar el inicio de sesión. " +
-                (error.message || error)
+                "Microsoft ha devuelto un error de autenticación: " +
+                error.message
             );
 
         }
@@ -857,18 +967,10 @@
 
 
     /*
-     * ==========================================================
-     * LOGIN
-     *
-     * NO usamos loginPopup().
-     *
-     * Usamos loginRedirect().
-     *
-     * Esto evita:
-     *
-     * block_nested_popups
-     * ==========================================================
-     */
+    ============================================================
+    LOGIN
+    ============================================================
+    */
 
     async function login() {
 
@@ -876,68 +978,56 @@
         console.log("INICIANDO LOGIN");
         console.log("====================================");
 
+
         const loginButton =
-            document.getElementById("loginButton");
+            document.getElementById(
+                "loginButton"
+            );
+
 
         try {
+
+            if (!msalReady) {
+
+                await inicializarMSAL();
+
+            }
+
+
+            /*
+             * Desactivar botón para evitar
+             * dobles clics.
+             */
 
             loginButton.disabled = true;
 
             loginButton.textContent =
                 "REDIRIGIENDO A MICROSOFT...";
 
-            await inicializarMSAL();
 
             /*
-             * Si ya hay una cuenta, no hace falta volver
-             * a iniciar sesión.
-             */
-
-            const accounts =
-                msalInstance.getAllAccounts();
-
-            if (
-                accounts &&
-                accounts.length > 0
-            ) {
-
-                executorAccount =
-                    accounts[0];
-
-                msalInstance.setActiveAccount(
-                    executorAccount
-                );
-
-                mostrarUsuarioEjecutor(
-                    executorAccount
-                );
-
-                mostrarConfirmacion();
-
-                loginButton.disabled = false;
-
-                loginButton.textContent =
-                    "INICIAR SESIÓN CON MICROSOFT 365";
-
-                return;
-
-            }
-
-            /*
-             * Login mediante REDIRECT.
+             * IMPORTANTE:
              *
-             * Microsoft devolverá al usuario a esta misma página.
+             * NO usamos loginPopup().
+             *
+             * Usamos loginRedirect().
+             *
+             * Microsoft autenticará al usuario
+             * y volverá a esta misma página.
              */
 
             await msalInstance.loginRedirect({
 
                 scopes: [
                     "User.Read"
-                ]
+                ],
+
+                prompt: "select_account"
 
             });
 
         }
+
         catch (error) {
 
             console.error(
@@ -945,15 +1035,17 @@
                 error
             );
 
+
             loginButton.disabled = false;
 
             loginButton.textContent =
                 "INICIAR SESIÓN CON MICROSOFT 365";
 
+
             mostrarError(
                 "loginError",
                 "No se ha podido iniciar sesión con Microsoft 365. " +
-                (error.message || error)
+                error.message
             );
 
         }
@@ -962,10 +1054,10 @@
 
 
     /*
-     * ==========================================================
-     * CONFIRMAR BAJA
-     * ==========================================================
-     */
+    ============================================================
+    CONFIRMAR BAJA
+    ============================================================
+    */
 
     async function confirmarBaja() {
 
@@ -996,15 +1088,22 @@
 
 
         if (!confirmar) {
+
             return;
+
         }
 
 
         const confirmButton =
-            document.getElementById("confirmButton");
+            document.getElementById(
+                "confirmButton"
+            );
+
 
         const cancelButton =
-            document.getElementById("cancelButton");
+            document.getElementById(
+                "cancelButton"
+            );
 
 
         confirmButton.disabled = true;
@@ -1016,6 +1115,7 @@
             .getElementById("confirmationSection")
             .classList.add("hidden");
 
+
         document
             .getElementById("loadingSection")
             .classList.remove("hidden");
@@ -1024,12 +1124,13 @@
         try {
 
             /*
-             * ==================================================
-             * POWER AUTOMATE
-             *
-             * PON AQUÍ LA URL REAL DEL TRIGGER HTTP.
-             * ==================================================
-             */
+            ====================================================
+            POWER AUTOMATE
+            ====================================================
+
+            PEGA AQUÍ LA URL DEL TRIGGER HTTP
+            DE POWER AUTOMATE.
+            */
 
             const POWER_AUTOMATE_URL =
                 "PON_AQUI_LA_URL_DE_POWER_AUTOMATE";
@@ -1057,17 +1158,14 @@
 
 
             const executorName =
-                executorAccount.name || "";
+                executorAccount.name ||
+                "";
+
 
             const executorEmail =
-                executorAccount.username || "";
+                executorAccount.username ||
+                "";
 
-
-            /*
-             * ==================================================
-             * DATOS ENVIADOS A POWER AUTOMATE
-             * ==================================================
-             */
 
             const datosBaja = {
 
@@ -1098,28 +1196,29 @@
             );
 
 
-            /*
-             * ==================================================
-             * PETICIÓN HTTP
-             * ==================================================
-             */
-
             const response =
                 await fetch(
+
                     POWER_AUTOMATE_URL,
+
                     {
 
                         method: "POST",
 
                         headers: {
+
                             "Content-Type":
                                 "application/json"
+
                         },
 
                         body:
-                            JSON.stringify(datosBaja)
+                            JSON.stringify(
+                                datosBaja
+                            )
 
                     }
+
                 );
 
 
@@ -1140,14 +1239,15 @@
 
 
             /*
-             * ==================================================
-             * ÉXITO
-             * ==================================================
-             */
+            ====================================================
+            ÉXITO
+            ====================================================
+            */
 
             document
                 .getElementById("loadingSection")
                 .classList.add("hidden");
+
 
             document
                 .getElementById("successSection")
@@ -1157,17 +1257,20 @@
             document
                 .getElementById("successUser")
                 .textContent =
-                    targetUserName ||
-                    targetUserEmail ||
-                    "Usuario";
+
+                targetUserName ||
+                targetUserEmail ||
+                "Usuario";
 
 
             document
                 .getElementById("successExecutor")
                 .textContent =
-                    executorEmail;
+
+                executorEmail;
 
         }
+
         catch (error) {
 
             console.error(
@@ -1179,6 +1282,7 @@
             document
                 .getElementById("loadingSection")
                 .classList.add("hidden");
+
 
             document
                 .getElementById("confirmationSection")
@@ -1202,21 +1306,25 @@
 
 
     /*
-     * ==========================================================
-     * CANCELAR
-     * ==========================================================
-     */
+    ============================================================
+    CANCELAR
+    ============================================================
+    */
 
     function cancelar() {
 
-        if (window.history.length > 1) {
+        if (
+            window.history.length > 1
+        ) {
 
             window.history.back();
 
         }
+
         else {
 
-            window.location.href = "about:blank";
+            window.location.href =
+                "index.html";
 
         }
 
@@ -1224,49 +1332,61 @@
 
 
     /*
-     * ==========================================================
-     * INICIO
-     * ==========================================================
-     */
+    ============================================================
+    INICIO
+    ============================================================
+    */
 
     document.addEventListener(
         "DOMContentLoaded",
         async function () {
+
+            console.log("====================================");
+            console.log("INICIANDO CONFIRMAR.HTML");
+            console.log("====================================");
+
 
             console.log(
                 "URL:",
                 window.location.href
             );
 
+
             console.log(
                 "Origin:",
                 window.location.origin
             );
+
 
             console.log(
                 "Redirect URI:",
                 msalConfig.auth.redirectUri
             );
 
+
             console.log(
                 "ID usuario:",
                 targetUserId
             );
+
 
             console.log(
                 "Nombre:",
                 targetUserName
             );
 
+
             console.log(
                 "Correo:",
                 targetUserEmail
             );
 
+
             console.log(
                 "Fecha:",
                 targetTerminationDate
             );
+
 
             console.log(
                 "MSAL disponible:",
@@ -1275,11 +1395,15 @@
 
 
             /*
-             * Mostrar inicialmente los datos de la baja.
+             * Mostrar datos inmediatamente.
              */
 
             mostrarDatosUsuario();
 
+
+            /*
+             * Comprobar MSAL.
+             */
 
             try {
 
@@ -1288,16 +1412,16 @@
                 /*
                  * MUY IMPORTANTE:
                  *
-                 * Primero procesamos el posible resultado
-                 * de Microsoft.
+                 * Primero procesamos el redirect.
                  *
-                 * Si la URL contiene #code=...
-                 * handleRedirectPromise() lo consume.
+                 * Esto es lo que evita que el #code=...
+                 * se quede sin procesar.
                  */
 
                 await procesarRespuestaMSAL();
 
             }
+
             catch (error) {
 
                 console.error(
@@ -1305,9 +1429,9 @@
                     error
                 );
 
+
                 mostrarError(
                     "loginError",
-                    "No se ha podido inicializar la autenticación. " +
                     error.message
                 );
 
