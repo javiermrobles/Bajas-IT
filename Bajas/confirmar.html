@@ -6,9 +6,14 @@
 
     <title>Confirmar baja - IT</title>
 
-    <!-- Microsoft Authentication Library -->
+    <!-- =========================================================
+        MICROSOFT MSAL
+        ========================================================= -->
+
     <script
-        src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js">
+        type="text/javascript"
+        src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"
+        crossorigin="anonymous">
     </script>
 
     <style>
@@ -196,6 +201,10 @@
             width: 100%;
         }
 
+        .btn-login:hover {
+            background: #124DB5;
+        }
+
         .btn-cancel {
             background: #FFFFFF;
             color: #344054;
@@ -275,6 +284,17 @@
             color: #98A2B3;
         }
 
+        .debug {
+            margin-top: 20px;
+            padding: 12px;
+            background: #101828;
+            color: #FFFFFF;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-word;
+        }
+
         @media (max-width: 600px) {
 
             .container {
@@ -316,14 +336,27 @@
 
     <div class="card">
 
-        <!-- CABECERA -->
+        <!-- =====================================================
+             CABECERA
+             ===================================================== -->
+
         <div class="header">
-            <h1>Procedimiento de baja</h1>
-            <p>Gestión de bajas · Equipo de IT</p>
+
+            <h1>
+                Procedimiento de baja
+            </h1>
+
+            <p>
+                Gestión de bajas · Equipo de IT
+            </p>
+
         </div>
 
 
-        <!-- LOGIN -->
+        <!-- =====================================================
+             LOGIN
+             ===================================================== -->
+
         <div id="loginSection" class="content">
 
             <div class="alert">
@@ -333,30 +366,52 @@
                 </div>
 
                 <div class="alert-text">
-                    Para continuar debes iniciar sesión con tu cuenta corporativa
-                    de Microsoft 365.
-                    La identidad del usuario quedará registrada como responsable
-                    de la operación.
+
+                    Para continuar debes iniciar sesión con tu
+                    cuenta corporativa de Microsoft 365.
+
+                    La identidad del usuario quedará registrada
+                    como responsable de la operación.
+
                 </div>
 
             </div>
 
+
             <button
                 id="loginButton"
                 class="btn-login"
-                onclick="login()">
+                type="button">
 
                 INICIAR SESIÓN CON MICROSOFT 365
 
             </button>
 
-            <div id="loginError" class="error hidden"></div>
+
+            <div
+                id="loginError"
+                class="error hidden">
+            </div>
+
+
+            <div
+                id="debugInfo"
+                class="debug">
+
+                Comprobando Microsoft MSAL...
+
+            </div>
 
         </div>
 
 
-        <!-- CONFIRMACIÓN -->
-        <div id="confirmationSection" class="content hidden">
+        <!-- =====================================================
+             CONFIRMACIÓN
+             ===================================================== -->
+
+        <div
+            id="confirmationSection"
+            class="content hidden">
 
             <div class="alert">
 
@@ -365,17 +420,22 @@
                 </div>
 
                 <div class="alert-text">
-                    Estás a punto de ejecutar el procedimiento de baja del usuario.
-                    Revisa cuidadosamente la información antes de continuar.
+
+                    Estás a punto de ejecutar el procedimiento
+                    de baja del usuario.
+
+                    Revisa cuidadosamente la información antes
+                    de continuar.
+
                 </div>
 
             </div>
 
 
-            <!-- INFORMACIÓN DEL USUARIO -->
             <div class="section-title">
                 Información del usuario
             </div>
+
 
             <div class="user-info">
 
@@ -388,7 +448,7 @@
                     <div
                         class="value"
                         id="userName">
-                        Cargando...
+                        -
                     </div>
 
                 </div>
@@ -403,7 +463,7 @@
                     <div
                         class="value"
                         id="userEmail">
-                        Cargando...
+                        -
                     </div>
 
                 </div>
@@ -418,7 +478,7 @@
                     <div
                         class="value"
                         id="userId">
-                        Cargando...
+                        -
                     </div>
 
                 </div>
@@ -433,7 +493,7 @@
                     <div
                         class="value"
                         id="terminationDate">
-                        Cargando...
+                        -
                     </div>
 
                 </div>
@@ -441,10 +501,10 @@
             </div>
 
 
-            <!-- EJECUTOR -->
             <div class="section-title">
                 Usuario que ejecuta la operación
             </div>
+
 
             <div class="executor">
 
@@ -455,13 +515,13 @@
                 <div class="executor-user">
 
                     <strong id="executorName">
-                        Cargando...
+                        -
                     </strong>
 
                     <br>
 
                     <span id="executorEmail">
-                        Cargando...
+                        -
                     </span>
 
                 </div>
@@ -469,7 +529,6 @@
             </div>
 
 
-            <!-- WARNING -->
             <div class="warning">
 
                 <div class="warning-title">
@@ -478,12 +537,15 @@
 
                 <div class="warning-text">
 
-                    Al confirmar esta operación, la cuenta del usuario será
-                    deshabilitada en Microsoft Entra ID y se impedirá su inicio
-                    de sesión.
+                    Al confirmar esta operación, la cuenta del
+                    usuario será deshabilitada en Microsoft
+                    Entra ID y se impedirá su inicio de sesión.
 
                     <div class="info-note">
-                        Esta operación será ejecutada por Power Automate.
+
+                        Esta operación será ejecutada por
+                        Power Automate.
+
                     </div>
 
                 </div>
@@ -491,13 +553,12 @@
             </div>
 
 
-            <!-- BOTONES -->
             <div class="buttons">
 
                 <button
                     id="cancelButton"
                     class="btn-cancel"
-                    onclick="cancelar()">
+                    type="button">
 
                     CANCELAR
 
@@ -507,7 +568,7 @@
                 <button
                     id="confirmButton"
                     class="btn-confirm"
-                    onclick="confirmarBaja()">
+                    type="button">
 
                     PROCEDER CON LA BAJA
 
@@ -515,28 +576,44 @@
 
             </div>
 
-            <div id="actionError" class="error hidden"></div>
+
+            <div
+                id="actionError"
+                class="error hidden">
+            </div>
 
         </div>
 
 
-        <!-- LOADING -->
-        <div id="loadingSection" class="loading hidden">
+        <!-- =====================================================
+             LOADING
+             ===================================================== -->
+
+        <div
+            id="loadingSection"
+            class="loading hidden">
 
             <div class="loading-title">
                 Procesando...
             </div>
 
             <div class="loading-text">
+
                 Estamos procesando la solicitud.
                 No cierres esta ventana.
+
             </div>
 
         </div>
 
 
-        <!-- SUCCESS -->
-        <div id="successSection" class="success hidden">
+        <!-- =====================================================
+             SUCCESS
+             ===================================================== -->
+
+        <div
+            id="successSection"
+            class="success hidden">
 
             <div class="success-icon">
                 ✅
@@ -547,28 +624,45 @@
             </h2>
 
             <p>
-                La cuenta del usuario ha sido deshabilitada correctamente
-                en Microsoft Entra ID.
+                La cuenta del usuario ha sido deshabilitada
+                correctamente en Microsoft Entra ID.
             </p>
 
             <p>
-                <strong>Usuario afectado:</strong>
+
+                <strong>
+                    Usuario afectado:
+                </strong>
+
                 <br>
+
                 <span id="successUser"></span>
+
             </p>
 
             <p>
-                <strong>Ejecutado por:</strong>
+
+                <strong>
+                    Ejecutado por:
+                </strong>
+
                 <br>
+
                 <span id="successExecutor"></span>
+
             </p>
 
         </div>
 
 
-        <!-- FOOTER -->
+        <!-- =====================================================
+             FOOTER
+             ===================================================== -->
+
         <div class="footer">
+
             Sistema interno de gestión de bajas · Equipo de IT
+
         </div>
 
     </div>
@@ -578,634 +672,1066 @@
 
 <script>
 
-/* ==========================================================
-   CONFIGURACIÓN MICROSOFT ENTRA ID
-   ========================================================== */
+    /* ==========================================================
+       CONFIGURACIÓN MICROSOFT ENTRA ID
+       ========================================================== */
 
-const msalConfig = {
+    const msalConfig = {
 
-    auth: {
+        auth: {
 
-        clientId:
-            "6442baca-37e7-4eb1-aa6a-041ce795d5ba",
+            clientId:
+                "6442baca-37e7-4eb1-aa6a-041ce795d5ba",
 
-        authority:
-            "https://login.microsoftonline.com/11d5bb73-8e25-45bd-85f3-932b3e22cafc",
+            authority:
+                "https://login.microsoftonline.com/11d5bb73-8e25-45bd-85f3-932b3e22cafc",
 
-        /*
-         * IMPORTANTE:
-         *
-         * Esta URL debe coincidir EXACTAMENTE con una Redirect URI
-         * configurada en Microsoft Entra ID.
-         *
-         * Si estás probando en localhost:
-         *
-         * http://localhost:5500/confirmar.html
-         *
-         * Cuando lo publiques en GitHub Pages será algo parecido a:
-         *
-         * https://TUUSUARIO.github.io/TUREPOSITORIO/confirmar.html
-         */
+            /*
+             * IMPORTANTE:
+             *
+             * Esta URL tiene que coincidir con una Redirect URI
+             * registrada en Microsoft Entra.
+             *
+             * Para GitHub Pages:
+             *
+             * https://javiermrobles.github.io/Bajas-IT/Bajas/confirmar.html
+             */
 
-        redirectUri:
-            window.location.origin +
-            window.location.pathname
-    }
+            redirectUri:
+                "https://javiermrobles.github.io/Bajas-IT/Bajas/confirmar.html"
 
-};
+        },
 
+        cache: {
 
-/* ==========================================================
-   VARIABLE MSAL
-   ========================================================== */
+            cacheLocation:
+                "sessionStorage",
 
-let msalInstance = null;
-
-
-/* ==========================================================
-   DATOS RECIBIDOS DESDE LA URL
-   ========================================================== */
-
-const params =
-    new URLSearchParams(
-        window.location.search
-    );
-
-
-/*
- * Estos valores los generará Power Automate.
- */
-
-const targetUserId =
-    params.get("id");
-
-const targetUserName =
-    params.get("nombre");
-
-const targetUserEmail =
-    params.get("email");
-
-const targetTerminationDate =
-    params.get("fecha");
-
-
-/* ==========================================================
-   MOSTRAR DATOS DEL USUARIO
-   ========================================================== */
-
-function mostrarDatosUsuario() {
-
-    document.getElementById("userName")
-        .textContent =
-        targetUserName ||
-        "No especificado";
-
-
-    document.getElementById("userEmail")
-        .textContent =
-        targetUserEmail ||
-        "No especificado";
-
-
-    document.getElementById("userId")
-        .textContent =
-        targetUserId ||
-        "No especificado";
-
-
-    document.getElementById("terminationDate")
-        .textContent =
-        targetTerminationDate ||
-        "Pendiente";
-
-}
-
-
-/* ==========================================================
-   INICIALIZAR MSAL
-   ========================================================== */
-
-async function inicializarMSAL() {
-
-    try {
-
-        console.log("Comprobando librería MSAL...");
-
-        if (typeof msal === "undefined") {
-
-            throw new Error(
-                "La librería MSAL no está disponible."
-            );
+            storeAuthStateInCookie:
+                false
 
         }
+
+    };
+
+
+    /* ==========================================================
+       VARIABLES
+       ========================================================== */
+
+    let msalInstance = null;
+
+    let executorAccount = null;
+
+
+    /* ==========================================================
+       DATOS DE LA URL
+       ========================================================== */
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const targetUserId =
+        params.get("id");
+
+
+    const targetUserName =
+        params.get("nombre");
+
+
+    const targetUserEmail =
+        params.get("email");
+
+
+    const targetTerminationDate =
+        params.get("fecha");
+
+
+    /* ==========================================================
+       DEBUG
+       ========================================================== */
+
+    function debug(mensaje) {
 
         console.log(
-            "MSAL detectado correctamente."
-        );
-
-
-        msalInstance =
-            new msal.PublicClientApplication(
-                msalConfig
-            );
-
-
-        await msalInstance.initialize();
-
-
-        console.log(
-            "MSAL inicializado correctamente."
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "ERROR INICIALIZANDO MSAL:",
-            error
-        );
-
-        mostrarError(
-            "loginError",
-            "No se ha podido inicializar la autenticación de Microsoft."
-        );
-
-    }
-
-}
-
-
-/* ==========================================================
-   LOGIN
-   ========================================================== */
-
-async function login() {
-
-    console.log("Iniciando login...");
-
-    const loginButton =
-        document.getElementById(
-            "loginButton"
-        );
-
-
-    try {
-
-        if (!msalInstance) {
-
-            await inicializarMSAL();
-
-        }
-
-
-        if (!msalInstance) {
-
-            throw new Error(
-                "MSAL no se ha podido inicializar."
-            );
-
-        }
-
-
-        loginButton.disabled = true;
-
-        loginButton.textContent =
-            "ABRIENDO MICROSOFT...";
-
-
-        const loginResponse =
-            await msalInstance.loginPopup({
-
-                scopes: [
-                    "User.Read"
-                ]
-
-            });
-
-
-        console.log(
-            "Login correcto:",
-            loginResponse.account
-        );
-
-
-        /*
-         * Guardamos la cuenta que ha iniciado sesión.
-         */
-
-        window.executorAccount =
-            loginResponse.account;
-
-
-        mostrarUsuarioEjecutor(
-            loginResponse.account
-        );
-
-
-        mostrarDatosUsuario();
-
-
-        document
-            .getElementById("loginSection")
-            .classList.add("hidden");
-
-
-        document
-            .getElementById("confirmationSection")
-            .classList.remove("hidden");
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "ERROR DE LOGIN:",
-            error
-        );
-
-
-        loginButton.disabled = false;
-
-        loginButton.textContent =
-            "INICIAR SESIÓN CON MICROSOFT 365";
-
-
-        if (
-            error &&
-            error.errorCode === "user_cancelled"
-        ) {
-
-            mostrarError(
-                "loginError",
-                "El inicio de sesión ha sido cancelado."
-            );
-
-        }
-
-        else {
-
-            mostrarError(
-                "loginError",
-                "No se ha podido iniciar sesión con Microsoft 365. Revisa la consola del navegador para obtener más información."
-            );
-
-        }
-
-    }
-
-}
-
-
-/* ==========================================================
-   MOSTRAR EJECUTOR
-   ========================================================== */
-
-function mostrarUsuarioEjecutor(account) {
-
-    document.getElementById("executorName")
-        .textContent =
-        account.name ||
-        "Usuario";
-
-
-    document.getElementById("executorEmail")
-        .textContent =
-        account.username ||
-        "";
-
-}
-
-
-/* ==========================================================
-   CONFIRMAR BAJA
-   ========================================================== */
-
-async function confirmarBaja() {
-
-    const confirmar =
-        window.confirm(
-
-            "¿Estás seguro de que quieres proceder con la baja?\n\n" +
-
-            "Usuario: " +
-            (
-                targetUserName ||
-                "No especificado"
-            ) +
-            "\n" +
-
-            "Correo: " +
-            (
-                targetUserEmail ||
-                "No especificado"
-            ) +
-            "\n\n" +
-
-            "Esta acción deshabilitará la cuenta en Microsoft Entra ID."
-
-        );
-
-
-    if (!confirmar) {
-
-        return;
-
-    }
-
-
-    const confirmButton =
-        document.getElementById(
-            "confirmButton"
-        );
-
-
-    const cancelButton =
-        document.getElementById(
-            "cancelButton"
-        );
-
-
-    confirmButton.disabled = true;
-
-    cancelButton.disabled = true;
-
-
-    document
-        .getElementById("confirmationSection")
-        .classList.add("hidden");
-
-
-    document
-        .getElementById("loadingSection")
-        .classList.remove("hidden");
-
-
-    try {
-
-        /*
-         * ======================================================
-         * POWER AUTOMATE
-         * ======================================================
-         *
-         * PON AQUÍ LA URL DEL TRIGGER HTTP DE POWER AUTOMATE.
-         *
-         * Ejemplo:
-         *
-         * const POWER_AUTOMATE_URL =
-         *     "https://....";
-         */
-
-        const POWER_AUTOMATE_URL =
-            "PON_AQUI_LA_URL_DE_POWER_AUTOMATE";
-
-
-        /*
-         * Comprobamos que el usuario ha iniciado sesión.
-         */
-
-        if (!window.executorAccount) {
-
-            throw new Error(
-                "No existe un usuario ejecutor autenticado."
-            );
-
-        }
-
-
-        /*
-         * Datos del usuario que ha iniciado sesión.
-         */
-
-        const executorName =
-            window.executorAccount.name ||
-            "";
-
-        const executorEmail =
-            window.executorAccount.username ||
-            "";
-
-
-        /*
-         * Enviamos los datos a Power Automate.
-         */
-
-        const response =
-            await fetch(
-                POWER_AUTOMATE_URL,
-                {
-
-                    method: "POST",
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-                    body: JSON.stringify({
-
-                        targetUserId:
-                            targetUserId,
-
-                        targetUserName:
-                            targetUserName,
-
-                        targetUserEmail:
-                            targetUserEmail,
-
-                        terminationDate:
-                            targetTerminationDate,
-
-                        executorName:
-                            executorName,
-
-                        executorEmail:
-                            executorEmail
-
-                    })
-
-                }
-            );
-
-
-        /*
-         * Si Power Automate devuelve error,
-         * no mostramos "Baja completada".
-         */
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Power Automate ha devuelto HTTP " +
-                response.status
-            );
-
-        }
-
-
-        /*
-         * Todo correcto.
-         */
-
-        document
-            .getElementById("loadingSection")
-            .classList.add("hidden");
-
-
-        document
-            .getElementById("successSection")
-            .classList.remove("hidden");
-
-
-        document.getElementById("successUser")
-            .textContent =
-            targetUserName ||
-            targetUserEmail ||
-            "Usuario";
-
-
-        document.getElementById("successExecutor")
-            .textContent =
-            executorEmail;
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "ERROR EJECUTANDO BAJA:",
-            error
-        );
-
-
-        document
-            .getElementById("loadingSection")
-            .classList.add("hidden");
-
-
-        document
-            .getElementById("confirmationSection")
-            .classList.remove("hidden");
-
-
-        confirmButton.disabled = false;
-
-        cancelButton.disabled = false;
-
-
-        mostrarError(
-            "actionError",
-            "No se ha podido ejecutar la baja. " +
-            "Comprueba Power Automate y vuelve a intentarlo."
-        );
-
-    }
-
-}
-
-
-/* ==========================================================
-   CANCELAR
-   ========================================================== */
-
-function cancelar() {
-
-    window.close();
-
-}
-
-
-/* ==========================================================
-   MOSTRAR ERROR
-   ========================================================== */
-
-function mostrarError(
-    elementId,
-    mensaje
-) {
-
-    const element =
-        document.getElementById(
-            elementId
-        );
-
-
-    if (!element) {
-
-        console.error(
+            "[BAJAS IT]",
             mensaje
         );
 
-        return;
+        const debugElement =
+            document.getElementById(
+                "debugInfo"
+            );
+
+        if (debugElement) {
+
+            debugElement.textContent =
+                mensaje;
+
+        }
 
     }
 
 
-    element.textContent =
-        mensaje;
+    /* ==========================================================
+       MOSTRAR DATOS
+       ========================================================== */
+
+    function mostrarDatosUsuario() {
+
+        document.getElementById(
+            "userName"
+        ).textContent =
+            targetUserName ||
+            "No especificado";
 
 
-    element.classList.remove(
-        "hidden"
-    );
+        document.getElementById(
+            "userEmail"
+        ).textContent =
+            targetUserEmail ||
+            "No especificado";
 
-}
+
+        document.getElementById(
+            "userId"
+        ).textContent =
+            targetUserId ||
+            "No especificado";
 
 
-/* ==========================================================
-   INICIO
-   ========================================================== */
+        document.getElementById(
+            "terminationDate"
+        ).textContent =
+            targetTerminationDate ||
+            "Pendiente";
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async function () {
+    }
+
+
+    /* ==========================================================
+       MOSTRAR EJECUTOR
+       ========================================================== */
+
+    function mostrarUsuarioEjecutor(account) {
+
+        if (!account) {
+            return;
+        }
+
+
+        document.getElementById(
+            "executorName"
+        ).textContent =
+            account.name ||
+            "Usuario";
+
+
+        document.getElementById(
+            "executorEmail"
+        ).textContent =
+            account.username ||
+            "";
+
+    }
+
+
+    /* ==========================================================
+       ERROR
+       ========================================================== */
+
+    function mostrarError(
+        elementId,
+        mensaje
+    ) {
+
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+
+        if (!element) {
+
+            console.error(
+                mensaje
+            );
+
+            return;
+
+        }
+
+
+        element.textContent =
+            mensaje;
+
+
+        element.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    /* ==========================================================
+       INICIALIZAR MSAL
+       ========================================================== */
+
+    async function inicializarMSAL() {
+
+        debug(
+            "Comprobando Microsoft MSAL..."
+        );
+
+
+        console.log(
+            "===================================="
+        );
 
         console.log(
             "Página cargada."
         );
 
-
         console.log(
-            "ID usuario:",
-            targetUserId
+            "URL:",
+            window.location.href
         );
 
-
         console.log(
-            "Nombre:",
-            targetUserName
+            "typeof msal:",
+            typeof msal
         );
 
-
         console.log(
-            "Correo:",
-            targetUserEmail
-        );
-
-
-        console.log(
-            "Fecha:",
-            targetTerminationDate
+            "===================================="
         );
 
 
         /*
-         * Mostrar inmediatamente los datos recibidos.
+         * Comprobar que MSAL realmente se ha cargado.
          */
 
-        mostrarDatosUsuario();
+        if (
+            typeof msal ===
+            "undefined"
+        ) {
+
+            debug(
+                "ERROR: MSAL NO está cargado."
+            );
 
 
-        /*
-         * Inicializar Microsoft.
-         */
+            throw new Error(
 
-        await inicializarMSAL();
+                "Microsoft MSAL no está disponible. " +
+
+                "Abre F12 → Network y comprueba " +
+
+                "si msal-browser.min.js devuelve HTTP 200."
+
+            );
+
+        }
+
+
+        debug(
+            "MSAL detectado correctamente."
+        );
+
+
+        try {
+
+            msalInstance =
+                new msal.PublicClientApplication(
+                    msalConfig
+                );
+
+
+            /*
+             * MSAL 2.35 soporta initialize.
+             */
+
+            if (
+                typeof msalInstance.initialize ===
+                "function"
+            ) {
+
+                await msalInstance.initialize();
+
+            }
+
+
+            debug(
+                "MSAL inicializado correctamente."
+            );
+
+
+            /*
+             * Comprobar cuentas existentes.
+             */
+
+            const accounts =
+                msalInstance.getAllAccounts();
+
+
+            if (
+                accounts &&
+                accounts.length > 0
+            ) {
+
+                executorAccount =
+                    accounts[0];
+
+
+                mostrarUsuarioEjecutor(
+                    executorAccount
+                );
+
+
+                /*
+                 * Si ya existe sesión,
+                 * mostramos directamente la confirmación.
+                 */
+
+                mostrarDatosUsuario();
+
+
+                document
+                    .getElementById(
+                        "loginSection"
+                    )
+                    .classList.add(
+                        "hidden"
+                    );
+
+
+                document
+                    .getElementById(
+                        "confirmationSection"
+                    )
+                    .classList.remove(
+                        "hidden"
+                    );
+
+
+                debug(
+                    "Sesión de Microsoft encontrada."
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "ERROR MSAL:",
+                error
+            );
+
+
+            debug(
+                "Error inicializando MSAL: " +
+                error.message
+            );
+
+
+            mostrarError(
+                "loginError",
+                "No se ha podido inicializar Microsoft 365. " +
+                error.message
+            );
+
+        }
 
     }
-);
+
+
+    /* ==========================================================
+       LOGIN
+       ========================================================== */
+
+    async function login() {
+
+        console.log(
+            "Iniciando login..."
+        );
+
+
+        const loginButton =
+            document.getElementById(
+                "loginButton"
+            );
+
+
+        /*
+         * Evitar dobles clics.
+         */
+
+        loginButton.disabled =
+            true;
+
+
+        loginButton.textContent =
+            "ABRIENDO MICROSOFT...";
+
+
+        try {
+
+            /*
+             * Asegurarnos de que MSAL está inicializado.
+             */
+
+            if (!msalInstance) {
+
+                await inicializarMSAL();
+
+            }
+
+
+            if (!msalInstance) {
+
+                throw new Error(
+                    "MSAL no se ha podido inicializar."
+                );
+
+            }
+
+
+            debug(
+                "Abriendo ventana de Microsoft..."
+            );
+
+
+            /*
+             * LOGIN POPUP
+             */
+
+            const loginResponse =
+                await msalInstance.loginPopup({
+
+                    scopes: [
+                        "User.Read"
+                    ]
+
+                });
+
+
+            console.log(
+                "Login correcto:",
+                loginResponse
+            );
+
+
+            executorAccount =
+                loginResponse.account;
+
+
+            /*
+             * Mostrar usuario ejecutor.
+             */
+
+            mostrarUsuarioEjecutor(
+                executorAccount
+            );
+
+
+            /*
+             * Mostrar datos de la baja.
+             */
+
+            mostrarDatosUsuario();
+
+
+            /*
+             * Ocultar login.
+             */
+
+            document
+                .getElementById(
+                    "loginSection"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+
+            /*
+             * Mostrar confirmación.
+             */
+
+            document
+                .getElementById(
+                    "confirmationSection"
+                )
+                .classList.remove(
+                    "hidden"
+                );
+
+
+            debug(
+                "Login correcto. Usuario autenticado: " +
+                executorAccount.username
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "ERROR DE LOGIN:",
+                error
+            );
+
+
+            loginButton.disabled =
+                false;
+
+
+            loginButton.textContent =
+                "INICIAR SESIÓN CON MICROSOFT 365";
+
+
+            /*
+             * Usuario canceló.
+             */
+
+            if (
+                error &&
+                (
+                    error.errorCode ===
+                    "user_cancelled" ||
+
+                    error.errorCode ===
+                    "user_canceled"
+                )
+            ) {
+
+                mostrarError(
+                    "loginError",
+                    "El inicio de sesión ha sido cancelado."
+                );
+
+
+                return;
+
+            }
+
+
+            let mensaje =
+                "No se ha podido iniciar sesión con Microsoft 365.";
+
+
+            if (
+                error &&
+                error.message
+            ) {
+
+                mensaje +=
+                    " " +
+                    error.message;
+
+            }
+
+
+            mostrarError(
+                "loginError",
+                mensaje
+            );
+
+
+            debug(
+                "Error de login: " +
+                (error.message || error)
+            );
+
+        }
+
+    }
+
+
+    /* ==========================================================
+       CONFIRMAR BAJA
+       ========================================================== */
+
+    async function confirmarBaja() {
+
+        /*
+         * Comprobar que hay usuario autenticado.
+         */
+
+        if (!executorAccount) {
+
+            mostrarError(
+                "actionError",
+                "No existe un usuario ejecutor autenticado."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Comprobar que tenemos ID del usuario.
+         */
+
+        if (!targetUserId) {
+
+            mostrarError(
+                "actionError",
+                "No se ha recibido el ID del usuario que se quiere dar de baja."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Confirmación final.
+         */
+
+        const confirmar =
+            window.confirm(
+
+                "¿Estás seguro de que quieres proceder con la baja?\n\n" +
+
+                "Usuario: " +
+                (
+                    targetUserName ||
+                    "No especificado"
+                ) +
+
+                "\n" +
+
+                "Correo: " +
+                (
+                    targetUserEmail ||
+                    "No especificado"
+                ) +
+
+                "\n\n" +
+
+                "Esta acción deshabilitará la cuenta en Microsoft Entra ID."
+
+            );
+
+
+        if (!confirmar) {
+
+            return;
+
+        }
+
+
+        const confirmButton =
+            document.getElementById(
+                "confirmButton"
+            );
+
+
+        const cancelButton =
+            document.getElementById(
+                "cancelButton"
+            );
+
+
+        confirmButton.disabled =
+            true;
+
+
+        cancelButton.disabled =
+            true;
+
+
+        document
+            .getElementById(
+                "confirmationSection"
+            )
+            .classList.add(
+                "hidden"
+            );
+
+
+        document
+            .getElementById(
+                "loadingSection"
+            )
+            .classList.remove(
+                "hidden"
+            );
+
+
+        try {
+
+            /*
+             * ===================================================
+             * POWER AUTOMATE
+             * ===================================================
+             *
+             * PON AQUÍ LA URL REAL DEL TRIGGER HTTP.
+             */
+
+            const POWER_AUTOMATE_URL =
+                "PON_AQUI_LA_URL_DE_POWER_AUTOMATE";
+
+
+            if (
+                POWER_AUTOMATE_URL ===
+                "PON_AQUI_LA_URL_DE_POWER_AUTOMATE"
+            ) {
+
+                throw new Error(
+                    "Todavía no se ha configurado la URL de Power Automate."
+                );
+
+            }
+
+
+            /*
+             * Datos del ejecutor.
+             */
+
+            const executorName =
+                executorAccount.name ||
+                "";
+
+
+            const executorEmail =
+                executorAccount.username ||
+                "";
+
+
+            /*
+             * Datos completos de la baja.
+             */
+
+            const datosBaja = {
+
+                targetUserId:
+                    targetUserId,
+
+                targetUserName:
+                    targetUserName,
+
+                targetUserEmail:
+                    targetUserEmail,
+
+                terminationDate:
+                    targetTerminationDate,
+
+                executorName:
+                    executorName,
+
+                executorEmail:
+                    executorEmail
+
+            };
+
+
+            console.log(
+                "Enviando datos a Power Automate:",
+                datosBaja
+            );
+
+
+            /*
+             * POST
+             */
+
+            const response =
+                await fetch(
+
+                    POWER_AUTOMATE_URL,
+
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                datosBaja
+                            )
+
+                    }
+
+                );
+
+
+            console.log(
+                "HTTP Power Automate:",
+                response.status
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+
+                    "Power Automate ha devuelto HTTP " +
+                    response.status
+
+                );
+
+            }
+
+
+            /*
+             * ÉXITO
+             */
+
+            document
+                .getElementById(
+                    "loadingSection"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+
+            document
+                .getElementById(
+                    "successSection"
+                )
+                .classList.remove(
+                    "hidden"
+                );
+
+
+            document
+                .getElementById(
+                    "successUser"
+                )
+                .textContent =
+
+                targetUserName ||
+                targetUserEmail ||
+                "Usuario";
+
+
+            document
+                .getElementById(
+                    "successExecutor"
+                )
+                .textContent =
+
+                executorEmail;
+
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "ERROR EJECUTANDO BAJA:",
+                error
+            );
+
+
+            document
+                .getElementById(
+                    "loadingSection"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+
+            document
+                .getElementById(
+                    "confirmationSection"
+                )
+                .classList.remove(
+                    "hidden"
+                );
+
+
+            confirmButton.disabled =
+                false;
+
+
+            cancelButton.disabled =
+                false;
+
+
+            mostrarError(
+
+                "actionError",
+
+                "No se ha podido ejecutar la baja. " +
+                error.message
+
+            );
+
+        }
+
+    }
+
+
+    /* ==========================================================
+       CANCELAR
+       ========================================================== */
+
+    function cancelar() {
+
+        /*
+         * Si venimos desde otra página,
+         * volvemos atrás.
+         */
+
+        if (
+            document.referrer &&
+            window.history.length > 1
+        ) {
+
+            window.history.back();
+
+        }
+
+        else {
+
+            /*
+             * Si no se puede volver,
+             * mostramos un mensaje.
+             */
+
+            alert(
+                "Puedes cerrar esta pestaña."
+            );
+
+        }
+
+    }
+
+
+    /* ==========================================================
+       EVENTOS
+       ========================================================== */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        async function () {
+
+            console.log(
+                "===================================="
+            );
+
+
+            console.log(
+                "Página cargada."
+            );
+
+
+            console.log(
+                "URL actual:",
+                window.location.href
+            );
+
+
+            console.log(
+                "ID usuario:",
+                targetUserId
+            );
+
+
+            console.log(
+                "Nombre:",
+                targetUserName
+            );
+
+
+            console.log(
+                "Correo:",
+                targetUserEmail
+            );
+
+
+            console.log(
+                "Fecha:",
+                targetTerminationDate
+            );
+
+
+            console.log(
+                "MSAL disponible:",
+                typeof msal
+            );
+
+
+            console.log(
+                "===================================="
+            );
+
+
+            /*
+             * Mostrar datos.
+             */
+
+            mostrarDatosUsuario();
+
+
+            /*
+             * Botón login.
+             */
+
+            document
+                .getElementById(
+                    "loginButton"
+                )
+                .addEventListener(
+                    "click",
+                    login
+                );
+
+
+            /*
+             * Botón confirmar.
+             */
+
+            document
+                .getElementById(
+                    "confirmButton"
+                )
+                .addEventListener(
+                    "click",
+                    confirmarBaja
+                );
+
+
+            /*
+             * Botón cancelar.
+             */
+
+            document
+                .getElementById(
+                    "cancelButton"
+                )
+                .addEventListener(
+                    "click",
+                    cancelar
+                );
+
+
+            /*
+             * Inicializar MSAL.
+             */
+
+            await inicializarMSAL();
+
+        }
+    );
 
 </script>
 
