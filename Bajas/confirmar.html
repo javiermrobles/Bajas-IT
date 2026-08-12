@@ -567,8 +567,123 @@
         word-break: break-all;
     }
 
+    /* -------------------- MODAL DE CONFIRMACIÓN -------------------- */
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(30, 35, 64, 0.35);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 20px;
+        opacity: 0;
+        animation: overlayIn 0.25s ease forwards;
+    }
+
+    @keyframes overlayIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .modal-card {
+        background: var(--surface);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 20px;
+        box-shadow: 0 30px 60px -20px rgba(79, 99, 232, 0.35), 0 2px 8px rgba(30, 35, 64, 0.06);
+        max-width: 400px;
+        width: 100%;
+        padding: 30px 28px 26px;
+        text-align: center;
+        animation: cardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-icon {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: var(--red-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #C1433F;
+    }
+
+    .modal-icon::before {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(225, 85, 84, 0.3);
+        opacity: 0;
+        animation: pulseRing 2.2s ease-out infinite;
+    }
+
+    .modal-icon svg { width: 22px; height: 22px; }
+
+    .modal-card h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 17px;
+        color: var(--ink);
+        margin: 0 0 12px;
+    }
+
+    .modal-card p {
+        font-size: 13.5px;
+        line-height: 21px;
+        color: var(--ink-dim);
+        margin: 0 0 18px;
+    }
+
+    .modal-summary {
+        text-align: left;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--surface-solid);
+        margin-bottom: 22px;
+    }
+
+    .modal-summary .row { display: flex; border-bottom: 1px solid var(--border); }
+    .modal-summary .row:last-child { border-bottom: none; }
+
+    .modal-summary .label {
+        width: 34%;
+        padding: 10px 14px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        background: rgba(79, 99, 232, 0.04);
+        display: flex;
+        align-items: center;
+    }
+
+    .modal-summary .value {
+        width: 66%;
+        padding: 10px 14px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        word-break: break-word;
+    }
+
+    .modal-buttons { display: flex; gap: 10px; }
+
     @media (prefers-reduced-motion: reduce) {
-        .blob, .card, .badge-ring, .btn-login::after, .spinner, .success-icon {
+        .blob, .card, .badge-ring, .btn-login::after, .spinner, .success-icon,
+        .modal-overlay, .modal-card, .modal-icon::before {
             animation: none !important;
             transition: none !important;
         }
@@ -581,6 +696,8 @@
         .row { display: block; }
         .label, .value { width: 100% !important; }
         .buttons { flex-direction: column; }
+        .modal-summary .row { display: block; }
+        .modal-summary .label, .modal-summary .value { width: 100% !important; }
     }
 </style>
 </head>
@@ -748,6 +865,39 @@
     </div>
 </div>
 
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+        <h3>¿Confirmar la baja?</h3>
+        <p>Esta acción deshabilitará la cuenta inmediatamente y no se puede revertir desde este portal.</p>
+
+        <div class="modal-summary">
+            <div class="row">
+                <div class="label">Usuario</div>
+                <div class="value" id="modalUserName"></div>
+            </div>
+            <div class="row">
+                <div class="label">Correo</div>
+                <div class="value" id="modalUserEmail"></div>
+            </div>
+        </div>
+
+        <div class="modal-buttons">
+            <button id="modalCancelButton" class="btn-cancel" type="button">CANCELAR</button>
+            <button id="modalConfirmButton" class="btn-confirm" type="button">SÍ, DAR DE BAJA</button>
+        </div>
+    </div>
+</div>
+
+
 <script>
 
     /*
@@ -847,6 +997,44 @@
         }
         element.textContent = mensaje;
         element.classList.remove("hidden");
+    }
+
+    /*
+    ============================================================
+    MODAL DE CONFIRMACIÓN (sustituye a window.confirm)
+    ============================================================
+    */
+
+    function mostrarModalConfirmacion() {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById("modalOverlay");
+            const confirmBtn = document.getElementById("modalConfirmButton");
+            const cancelBtn = document.getElementById("modalCancelButton");
+
+            document.getElementById("modalUserName").textContent = targetUserName || "No especificado";
+            document.getElementById("modalUserEmail").textContent = targetUserEmail || "No especificado";
+
+            overlay.classList.remove("hidden");
+
+            function cerrar(resultado) {
+                overlay.classList.add("hidden");
+                confirmBtn.removeEventListener("click", onConfirm);
+                cancelBtn.removeEventListener("click", onCancel);
+                overlay.removeEventListener("click", onOverlayClick);
+                document.removeEventListener("keydown", onKeydown);
+                resolve(resultado);
+            }
+
+            function onConfirm() { cerrar(true); }
+            function onCancel() { cerrar(false); }
+            function onOverlayClick(e) { if (e.target === overlay) cerrar(false); }
+            function onKeydown(e) { if (e.key === "Escape") cerrar(false); }
+
+            confirmBtn.addEventListener("click", onConfirm);
+            cancelBtn.addEventListener("click", onCancel);
+            overlay.addEventListener("click", onOverlayClick);
+            document.addEventListener("keydown", onKeydown);
+        });
     }
 
     /*
@@ -982,12 +1170,7 @@
     */
 
     async function confirmarBaja() {
-        const confirmar = window.confirm(
-            "¿Estás seguro de que quieres proceder con la baja?\n\n" +
-            "Usuario: " + (targetUserName || "No especificado") + "\n" +
-            "Correo: " + (targetUserEmail || "No especificado") + "\n\n" +
-            "Esta acción deshabilitará la cuenta en Microsoft Entra ID."
-        );
+        const confirmar = await mostrarModalConfirmacion();
 
         if (!confirmar) return;
 
