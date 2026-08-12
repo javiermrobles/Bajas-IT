@@ -1,580 +1,751 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-```
-<title>Confirmar baja - IT</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de bajas · IT</title>
 
 <!--
     ============================================================
     MICROSOFT MSAL
     ============================================================
-
-    IMPORTANTE:
-    Para máxima estabilidad en GitHub Pages te recomiendo
-    descargar este archivo y guardarlo en:
-
-    Bajas-IT/
-    └── Bajas/
-        ├── confirmar.html
-        └── msal-browser.min.js
-
-    Entonces cambia el src por:
-
-    <script src="./msal-browser.min.js"></script>
-
-    De momento utilizamos el CDN oficial de Microsoft.
+    IMPORTANTE: para máxima estabilidad en GitHub Pages, descarga
+    este archivo y guárdalo junto a confirmar.html como
+    msal-browser.min.js, y cambia el src por "./msal-browser.min.js".
+    De momento se usa el CDN oficial de Microsoft.
 -->
 <script src="./msal-browser.min.js"></script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
-    * {
-        box-sizing: border-box;
+    :root {
+        --sky: #E4F1FF;
+        --lav: #F1ECFF;
+        --mint: #E7FBF3;
+        --surface: rgba(255, 255, 255, 0.72);
+        --surface-solid: #FFFFFF;
+        --border: rgba(30, 35, 64, 0.09);
+        --ink: #1E2340;
+        --ink-dim: #5B6285;
+        --ink-faint: #97A0C3;
+        --accent: #4F63E8;
+        --accent-bright: #7B8CFF;
+        --green: #1FAE7C;
+        --green-bg: rgba(31, 174, 124, 0.09);
+        --red: #E15554;
+        --red-bg: rgba(225, 85, 84, 0.08);
     }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
 
     body {
         margin: 0;
         padding: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #F2F4F7;
-        color: #344054;
+        font-family: 'Inter', Arial, sans-serif;
+        color: var(--ink);
+        background: linear-gradient(160deg, var(--sky) 0%, var(--lav) 55%, var(--mint) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
     }
 
+    /* -------------------- FONDO ANIMADO -------------------- */
+
+    .aura { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+
+    .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(70px);
+        opacity: 0.5;
+        animation: drift 20s ease-in-out infinite alternate;
+    }
+
+    .blob-1 { width: 420px; height: 420px; top: -120px; left: -100px; background: #A9C3FF; animation-duration: 22s; }
+    .blob-2 { width: 380px; height: 380px; bottom: -140px; right: -90px; background: #C9B6FF; animation-duration: 26s; animation-delay: -6s; }
+    .blob-3 { width: 300px; height: 300px; top: 40%; right: 10%; background: #A6F0D6; animation-duration: 18s; animation-delay: -3s; }
+
+    @keyframes drift {
+        from { transform: translate(0, 0) scale(1); }
+        to   { transform: translate(50px, -40px) scale(1.18); }
+    }
+
+    /* -------------------- CONTENEDOR -------------------- */
+
     .container {
+        position: relative;
+        z-index: 1;
         width: 100%;
-        max-width: 720px;
-        margin: 50px auto;
+        max-width: 460px;
+        margin: 64px auto;
         padding: 20px;
     }
 
     .card {
-        background: #FFFFFF;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(16, 24, 40, 0.08);
+        background: var(--surface);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 20px;
+        box-shadow: 0 30px 60px -25px rgba(79, 99, 232, 0.28), 0 2px 8px rgba(30, 35, 64, 0.04);
         overflow: hidden;
+        animation: cardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .header {
-        padding: 28px 32px;
-        background: #FFFFFF;
-        border-bottom: 1px solid #EAECF0;
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(18px) scale(0.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
     }
+
+    /* -------------------- CABECERA / BADGE -------------------- */
+
+    .header {
+        padding: 40px 32px 28px;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+        position: relative;
+        width: 62px;
+        height: 62px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 26px -6px rgba(79, 99, 232, 0.55);
+    }
+
+    .badge-ring {
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        border: 1.5px solid var(--accent-bright);
+        opacity: 0;
+        animation: pulseRing 2.6s ease-out infinite;
+    }
+
+    .badge-ring.r2 { animation-delay: 1.3s; }
+
+    @keyframes pulseRing {
+        0%   { transform: scale(0.78); opacity: 0.55; }
+        100% { transform: scale(1.65); opacity: 0; }
+    }
+
+    .badge svg { width: 26px; height: 26px; }
 
     .header h1 {
         margin: 0;
-        font-size: 24px;
-        color: #101828;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 21px;
+        color: var(--ink);
+        letter-spacing: -0.2px;
     }
 
     .header p {
-        margin: 8px 0 0;
-        font-size: 14px;
-        color: #667085;
+        margin: 7px 0 0;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--ink-faint);
     }
 
-    .content {
-        padding: 32px;
-    }
+    .content { padding: 28px 32px 32px; }
+
+    /* -------------------- ALERTAS -------------------- */
 
     .alert {
-        background: #FFF8EB;
-        border: 1px solid #F5C26B;
-        border-radius: 8px;
-        padding: 18px;
-        margin-bottom: 28px;
+        background: rgba(79, 99, 232, 0.07);
+        border: 1px solid rgba(79, 99, 232, 0.16);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
     }
 
     .alert-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #92400E;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--accent);
         margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .alert-text {
-        font-size: 14px;
+        font-size: 13.5px;
         line-height: 21px;
-        color: #78350F;
+        color: var(--ink-dim);
     }
 
     .section-title {
-        font-size: 17px;
-        font-weight: bold;
-        color: #101828;
-        margin-bottom: 15px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        font-weight: 500;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
+
+    .section-title::before {
+        content: "";
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--accent-bright);
+        flex: 0 0 auto;
+    }
+
+    /* -------------------- ANIMACIÓN DE ENTRADA (confirmación) -------------------- */
+
+    #confirmationSection > * {
+        animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    #confirmationSection > *:nth-child(1) { animation-delay: 0.02s; }
+    #confirmationSection > *:nth-child(2) { animation-delay: 0.08s; }
+    #confirmationSection > *:nth-child(3) { animation-delay: 0.14s; }
+    #confirmationSection > *:nth-child(4) { animation-delay: 0.2s; }
+    #confirmationSection > *:nth-child(5) { animation-delay: 0.26s; }
+    #confirmationSection > *:nth-child(6) { animation-delay: 0.32s; }
+    #confirmationSection > *:nth-child(7) { animation-delay: 0.38s; }
+
+    @keyframes rise {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* -------------------- DATOS -------------------- */
 
     .user-info {
-        border: 1px solid #EAECF0;
-        border-radius: 8px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
         overflow: hidden;
-        margin-bottom: 28px;
+        margin-bottom: 24px;
+        background: var(--surface-solid);
     }
 
-    .row {
-        display: flex;
-        border-bottom: 1px solid #EAECF0;
-    }
-
-    .row:last-child {
-        border-bottom: none;
-    }
+    .row { display: flex; border-bottom: 1px solid var(--border); transition: background 0.15s ease; }
+    .row:last-child { border-bottom: none; }
+    .row:hover { background: rgba(79, 99, 232, 0.035); }
 
     .label {
-        width: 35%;
-        padding: 13px 15px;
-        background: #F9FAFB;
-        font-weight: bold;
-        font-size: 13px;
-        color: #475467;
+        width: 38%;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        background: rgba(79, 99, 232, 0.04);
     }
 
+    .label svg { width: 13px; height: 13px; flex: 0 0 auto; opacity: 0.7; }
+
     .value {
-        width: 65%;
-        padding: 13px 15px;
-        font-size: 14px;
-        color: #344054;
+        width: 62%;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        color: var(--ink);
         word-break: break-word;
     }
 
+    .value.is-empty { color: var(--ink-faint); font-style: italic; }
+
+    /* -------------------- EJECUTOR -------------------- */
+
     .executor {
-        background: #F9FAFB;
-        border: 1px solid #EAECF0;
-        border-radius: 8px;
-        padding: 18px;
-        margin-bottom: 28px;
+        background: linear-gradient(135deg, rgba(79, 99, 232, 0.05), rgba(123, 140, 255, 0.03));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
     }
 
-    .executor-title {
-        font-size: 15px;
-        font-weight: bold;
-        color: #101828;
-        margin-bottom: 8px;
+    .executor-icon {
+        position: relative;
+        flex: 0 0 auto;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-shadow: 0 6px 16px -4px rgba(79, 99, 232, 0.5);
     }
 
-    .executor-user {
-        font-size: 14px;
-        color: #475467;
-        line-height: 22px;
+    .executor-icon::after {
+        content: "";
+        position: absolute;
+        right: -1px;
+        bottom: -1px;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--green);
+        border: 2px solid var(--surface-solid);
     }
+
+    .executor-icon svg { width: 18px; height: 18px; }
+
+    .executor-body { flex: 1; min-width: 0; }
+
+    .executor-eyebrow {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-bottom: 4px;
+    }
+
+    .executor-user { font-size: 14px; color: var(--ink); line-height: 21px; font-weight: 600; }
+    .executor-user span {
+        display: block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--ink-dim);
+        margin-top: 1px;
+    }
+
+    /* -------------------- ADVERTENCIA -------------------- */
 
     .warning {
-        border-left: 5px solid #B42318;
-        background: #FFF7F7;
-        padding: 18px;
-        margin-bottom: 28px;
+        border: 1px solid rgba(225, 85, 84, 0.22);
+        background: var(--red-bg);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 26px;
+        display: flex;
+        gap: 13px;
+        align-items: flex-start;
     }
 
+    .warning-icon {
+        position: relative;
+        flex: 0 0 auto;
+        width: 30px;
+        height: 30px;
+        margin-top: 1px;
+        border-radius: 50%;
+        background: rgba(225, 85, 84, 0.14);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #C1433F;
+    }
+
+    .warning-icon::before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(225, 85, 84, 0.35);
+        opacity: 0;
+        animation: pulseRing 2.2s ease-out infinite;
+    }
+
+    .warning-icon svg { width: 15px; height: 15px; }
+
+    .warning-body { flex: 1; min-width: 0; }
+
     .warning-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #B42318;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #C1433F;
         margin-bottom: 7px;
     }
 
-    .warning-text {
-        font-size: 14px;
-        color: #475467;
-        line-height: 22px;
-    }
+    .warning-text { font-size: 13.5px; color: var(--ink-dim); line-height: 21px; }
 
     .info-note {
-        margin-top: 12px;
-        font-size: 12px;
-        color: #667085;
-        line-height: 18px;
+        margin-top: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        color: var(--ink-faint);
     }
 
-    .buttons {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 30px;
-    }
+    /* -------------------- BOTONES -------------------- */
+
+    .buttons { display: flex; gap: 12px; margin-top: 4px; }
 
     button {
         border: none;
-        border-radius: 6px;
-        padding: 14px 24px;
-        font-size: 15px;
-        font-weight: bold;
+        border-radius: 12px;
+        padding: 13px 22px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
         cursor: pointer;
+        transition: transform 0.12s ease, box-shadow 0.2s ease, opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
 
-    button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:active:not(:disabled) { transform: scale(0.98); }
 
     .btn-login {
-        background: #175CD3;
-        color: #FFFFFF;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+        color: #fff;
         width: 100%;
+        box-shadow: 0 10px 24px -8px rgba(79, 99, 232, 0.55);
     }
 
-    .btn-login:hover {
-        background: #124DB5;
+    .btn-login::after {
+        content: "";
+        position: absolute;
+        top: 0; left: -60%;
+        width: 40%; height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+        transform: skewX(-20deg);
+        transition: left 0.65s ease;
+    }
+
+    .btn-login:hover:not(:disabled)::after { left: 140%; }
+    .btn-login:hover:not(:disabled) { box-shadow: 0 14px 30px -8px rgba(79, 99, 232, 0.65); }
+
+    .btn-login:focus-visible,
+    .btn-cancel:focus-visible,
+    .btn-confirm:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
     }
 
     .btn-cancel {
-        background: #FFFFFF;
-        color: #344054;
-        border: 1px solid #D0D5DD;
+        background: var(--surface-solid);
+        color: var(--ink-dim);
+        border: 1px solid var(--border);
+        flex: 1;
     }
+
+    .btn-cancel:hover:not(:disabled) { border-color: var(--ink-faint); color: var(--ink); }
 
     .btn-confirm {
-        background: #B42318;
-        color: #FFFFFF;
+        background: var(--red);
+        color: #fff;
+        flex: 1;
+        box-shadow: 0 10px 22px -8px rgba(225, 85, 84, 0.5);
     }
 
-    .btn-confirm:hover {
-        background: #912018;
+    .btn-confirm:hover:not(:disabled) { background: #C1433F; }
+
+    .hidden { display: none !important; }
+
+    /* -------------------- LOADING -------------------- */
+
+    .loading { text-align: center; padding: 58px 20px; }
+
+    .spinner {
+        width: 30px; height: 30px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(79, 99, 232, 0.15);
+        border-top-color: var(--accent);
+        animation: spin 0.8s linear infinite;
     }
 
-    .btn-cancel:hover {
-        background: #F9FAFB;
-    }
-
-    .hidden {
-        display: none !important;
-    }
-
-    .loading {
-        text-align: center;
-        padding: 50px 20px;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .loading-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #101828;
-        margin-bottom: 8px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 16.5px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 6px;
     }
 
-    .loading-text {
-        font-size: 14px;
-        color: #667085;
-    }
+    .loading-text { font-size: 13.5px; color: var(--ink-faint); }
+
+    /* -------------------- ERROR -------------------- */
 
     .error {
-        background: #FEF3F2;
-        border: 1px solid #FDA29B;
-        color: #B42318;
-        border-radius: 8px;
-        padding: 16px;
-        margin-top: 20px;
-        font-size: 14px;
-        line-height: 21px;
+        background: var(--red-bg);
+        border: 1px solid rgba(225, 85, 84, 0.25);
+        color: #C1433F;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-top: 18px;
+        font-size: 13px;
+        line-height: 20px;
     }
 
-    .success {
-        text-align: center;
-        padding: 40px 20px;
-    }
+    /* -------------------- SUCCESS -------------------- */
+
+    .success { text-align: center; padding: 46px 20px 12px; }
 
     .success-icon {
-        font-size: 50px;
-        margin-bottom: 15px;
+        position: relative;
+        width: 54px; height: 54px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--green), #37D79C);
+        display: flex; align-items: center; justify-content: center;
+        color: #fff;
+        box-shadow: 0 10px 24px -8px rgba(31, 174, 124, 0.5);
+        animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+        0% { transform: scale(0.4); opacity: 0; }
+        70% { transform: scale(1.08); opacity: 1; }
+        100% { transform: scale(1); }
     }
 
     .success h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
         margin: 0 0 10px;
-        color: #027A48;
+        color: var(--ink);
+        font-size: 19px;
     }
 
-    .success p {
-        color: #475467;
+    .success > p {
+        color: var(--ink-dim);
         line-height: 22px;
+        font-size: 14px;
+        max-width: 360px;
+        margin: 0 auto 8px;
     }
+
+    .success-detail {
+        text-align: left;
+        margin-top: 22px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--surface-solid);
+    }
+
+    /* -------------------- FOOTER -------------------- */
 
     .footer {
-        padding: 18px 32px;
-        background: #F9FAFB;
+        padding: 16px 32px;
+        border-top: 1px solid var(--border);
         text-align: center;
-        font-size: 11px;
-        color: #98A2B3;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.4px;
+        color: var(--ink-faint);
     }
 
     .debug {
-        margin-top: 20px;
+        margin-top: 18px;
         padding: 12px;
-        background: #F9FAFB;
-        border: 1px solid #EAECF0;
-        border-radius: 6px;
+        background: rgba(79, 99, 232, 0.05);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace;
         font-size: 11px;
-        color: #667085;
+        color: var(--ink-faint);
         word-break: break-all;
     }
 
-    @media (max-width: 600px) {
-        .container {
-            margin: 20px auto;
-            padding: 10px;
-        }
-
-        .content {
-            padding: 22px;
-        }
-
-        .header {
-            padding: 22px;
-        }
-
-        .row {
-            display: block;
-        }
-
-        .label,
-        .value {
-            width: 100%;
-        }
-
-        .buttons {
-            flex-direction: column;
-        }
-
-        button {
-            width: 100%;
+    @media (prefers-reduced-motion: reduce) {
+        .blob, .card, .badge-ring, .btn-login::after, .spinner, .success-icon {
+            animation: none !important;
+            transition: none !important;
         }
     }
-</style>
-```
 
+    @media (max-width: 600px) {
+        .container { margin: 28px auto; padding: 12px; }
+        .content { padding: 24px 22px; }
+        .header { padding: 30px 22px 24px; }
+        .row { display: block; }
+        .label, .value { width: 100% !important; }
+        .buttons { flex-direction: column; }
+    }
+</style>
 </head>
 
 <body>
 
+<div class="aura">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
 <div class="container">
     <div class="card">
 
-```
-    <!-- CABECERA -->
-    <div class="header">
-        <h1>Procedimiento de baja</h1>
-        <p>Gestión de bajas · Equipo de IT</p>
-    </div>
-
-
-    <!-- LOGIN -->
-    <div id="loginSection" class="content">
-
-        <div class="alert">
-            <div class="alert-title">
-                🔐 Autenticación requerida
+        <!-- CABECERA -->
+        <div class="header">
+            <div class="badge">
+                <span class="badge-ring r1"></span>
+                <span class="badge-ring r2"></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="10" width="16" height="10" rx="2"></rect>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                </svg>
             </div>
-
-            <div class="alert-text">
-                Para continuar debes iniciar sesión con tu cuenta
-                corporativa de Microsoft 365.
-                La identidad del usuario quedará registrada como
-                responsable de la operación.
-            </div>
-        </div>
-
-        <button
-            id="loginButton"
-            class="btn-login"
-            type="button"
-            onclick="login()">
-
-            INICIAR SESIÓN CON MICROSOFT 365
-
-        </button>
-
-        <div id="loginError" class="error hidden"></div>
-
-        <div id="debugInfo" class="debug hidden"></div>
-
-    </div>
-
-
-    <!-- CONFIRMACIÓN -->
-    <div id="confirmationSection" class="content hidden">
-
-        <div class="alert">
-            <div class="alert-title">
-                ⚠️ Confirmación de baja
-            </div>
-
-            <div class="alert-text">
-                Estás a punto de ejecutar el procedimiento de baja
-                del usuario.
-                Revisa cuidadosamente la información antes de continuar.
-            </div>
+            <h1>Portal de bajas</h1>
+            <p>Gestión de bajas · Equipo de IT</p>
         </div>
 
 
-        <div class="section-title">
-            Información del usuario
-        </div>
+        <!-- LOGIN -->
+        <div id="loginSection" class="content">
 
-        <div class="user-info">
-
-            <div class="row">
-                <div class="label">NOMBRE</div>
-                <div class="value" id="userName">
-                    Cargando...
+            <div class="alert">
+                <div class="alert-title">🔐 Autenticación requerida</div>
+                <div class="alert-text">
+                    Para continuar debes iniciar sesión con tu cuenta corporativa de Microsoft 365.
+                    La identidad del usuario quedará registrada como responsable de la operación.
                 </div>
             </div>
 
-            <div class="row">
-                <div class="label">CORREO</div>
-                <div class="value" id="userEmail">
-                    Cargando...
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="label">ID DEL USUARIO</div>
-                <div class="value" id="userId">
-                    Cargando...
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="label">FECHA DE BAJA</div>
-                <div class="value" id="terminationDate">
-                    Cargando...
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="section-title">
-            Usuario que ejecuta la operación
-        </div>
-
-        <div class="executor">
-
-            <div class="executor-title">
-                👨‍💻 Responsable de la baja
-            </div>
-
-            <div class="executor-user">
-
-                <strong id="executorName">
-                    Cargando...
-                </strong>
-
-                <br>
-
-                <span id="executorEmail">
-                    Cargando...
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="warning">
-
-            <div class="warning-title">
-                ⚠️ Acción administrativa
-            </div>
-
-            <div class="warning-text">
-
-                Al confirmar esta operación, la cuenta del usuario
-                será deshabilitada en Microsoft Entra ID y se impedirá
-                su inicio de sesión.
-
-                <div class="info-note">
-                    Esta operación será ejecutada por Power Automate.
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="buttons">
-
-            <button
-                id="cancelButton"
-                class="btn-cancel"
-                type="button"
-                onclick="cancelar()">
-
-                CANCELAR
-
+            <button id="loginButton" class="btn-login" type="button" onclick="login()">
+                INICIAR SESIÓN CON MICROSOFT 365
             </button>
 
-            <button
-                id="confirmButton"
-                class="btn-confirm"
-                type="button"
-                onclick="confirmarBaja()">
-
-                PROCEDER CON LA BAJA
-
-            </button>
+            <div id="loginError" class="error hidden"></div>
+            <div id="debugInfo" class="debug hidden"></div>
 
         </div>
 
-        <div id="actionError" class="error hidden"></div>
 
-    </div>
+        <!-- CONFIRMACIÓN -->
+        <div id="confirmationSection" class="content hidden">
 
+            <div class="alert">
+                <div class="alert-title">⚠️ Confirmación de baja</div>
+                <div class="alert-text">
+                    Estás a punto de ejecutar el procedimiento de baja del usuario.
+                    Revisa cuidadosamente la información antes de continuar.
+                </div>
+            </div>
 
-    <!-- LOADING -->
-    <div id="loadingSection" class="loading hidden">
+            <div class="section-title">Información del usuario</div>
 
-        <div class="loading-title">
-            Procesando...
+            <div class="user-info">
+                <div class="row">
+                    <div class="label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Nombre
+                    </div>
+                    <div class="value" id="userName">Cargando...</div>
+                </div>
+                <div class="row">
+                    <div class="label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+                        Correo
+                    </div>
+                    <div class="value" id="userEmail">Cargando...</div>
+                </div>
+                <div class="row">
+                    <div class="label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 8h10M7 12h6"></path></svg>
+                        ID del usuario
+                    </div>
+                    <div class="value" id="userId">Cargando...</div>
+                </div>
+                <div class="row">
+                    <div class="label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                        Fecha de baja
+                    </div>
+                    <div class="value" id="terminationDate">Cargando...</div>
+                </div>
+            </div>
+
+            <div class="section-title">Usuario que ejecuta la operación</div>
+
+            <div class="executor">
+                <div class="executor-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <div class="executor-body">
+                    <div class="executor-eyebrow">Responsable de la baja</div>
+                    <div class="executor-user">
+                        <strong id="executorName">Cargando...</strong>
+                        <span id="executorEmail">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning">
+                <div class="warning-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <div class="warning-body">
+                    <div class="warning-title">Acción administrativa irreversible</div>
+                    <div class="warning-text">
+                        Al confirmar esta operación, la cuenta del usuario será deshabilitada
+                        y se impedirá su inicio de sesión.
+                        <div class="info-note">Esta operación será ejecutada inmediatamente.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button id="cancelButton" class="btn-cancel" type="button" onclick="cancelar()">CANCELAR</button>
+                <button id="confirmButton" class="btn-confirm" type="button" onclick="confirmarBaja()">PROCEDER CON LA BAJA</button>
+            </div>
+
+            <div id="actionError" class="error hidden"></div>
+
         </div>
 
-        <div class="loading-text">
-            Estamos procesando la solicitud.
-            No cierres esta ventana.
+
+        <!-- LOADING -->
+        <div id="loadingSection" class="loading hidden">
+            <div class="spinner"></div>
+            <div class="loading-title">Procesando...</div>
+            <div class="loading-text">Estamos procesando la solicitud. No cierres esta ventana.</div>
         </div>
 
-    </div>
 
+        <!-- SUCCESS -->
+        <div id="successSection" class="success hidden">
+            <div class="success-icon">✓</div>
+            <h2>Baja completada</h2>
+            <p>La cuenta del usuario ha sido deshabilitada correctamente en Microsoft Entra ID.</p>
 
-    <!-- SUCCESS -->
-    <div id="successSection" class="success hidden">
-
-        <div class="success-icon">
-            ✅
+            <div class="success-detail">
+                <div class="row">
+                    <div class="label">Usuario afectado</div>
+                    <div class="value" id="successUser"></div>
+                </div>
+                <div class="row">
+                    <div class="label">Ejecutado por</div>
+                    <div class="value" id="successExecutor"></div>
+                </div>
+            </div>
         </div>
 
-        <h2>
-            Baja completada
-        </h2>
 
-        <p>
-            La cuenta del usuario ha sido deshabilitada correctamente
-            en Microsoft Entra ID.
-        </p>
-
-        <p>
-            <strong>Usuario afectado:</strong>
-            <br>
-            <span id="successUser"></span>
-        </p>
-
-        <p>
-            <strong>Ejecutado por:</strong>
-            <br>
-            <span id="successExecutor"></span>
-        </p>
+        <!-- FOOTER -->
+        <div class="footer">SISTEMA INTERNO DE GESTIÓN DE BAJAS · EQUIPO DE IT</div>
 
     </div>
-
-
-    <!-- FOOTER -->
-    <div class="footer">
-        Sistema interno de gestión de bajas · Equipo de IT
-    </div>
-
-</div>
-```
-
 </div>
 
 <script>
@@ -586,49 +757,25 @@
     */
 
     const msalConfig = {
-
         auth: {
-
-            clientId:
-                "6442baca-37e7-4eb1-aa6a-041ce795d5ba",
-
-            authority:
-                "https://login.microsoftonline.com/11d5bb73-8e25-45bd-85f3-932b3e22cafc",
-
+            clientId: "6442baca-37e7-4eb1-aa6a-041ce795d5ba",
+            authority: "https://login.microsoftonline.com/11d5bb73-8e25-45bd-85f3-932b3e22cafc",
             /*
-             * MUY IMPORTANTE:
-             * Debe coincidir exactamente con la URL registrada
-             * en Microsoft Entra.
-             *
-             * En local:
-             * http://localhost:5500/confirmar.html
-             *
-             * En producción:
-             * https://javiermrobles.github.io/Bajas-IT/Bajas/confirmar.html
+             * MUY IMPORTANTE: debe coincidir exactamente con la URL
+             * registrada en Microsoft Entra.
+             * En local:       http://localhost:5500/confirmar.html
+             * En producción:  https://javiermrobles.github.io/Bajas-IT/Bajas/confirmar.html
              */
-
-            redirectUri:
-                window.location.origin +
-                window.location.pathname
-
+            redirectUri: window.location.origin + window.location.pathname
         },
-
         cache: {
-
             cacheLocation: "sessionStorage",
-
             storeAuthStateInCookie: false
-
         },
-
         system: {
-
             allowRedirectInIframe: false
-
         }
-
     };
-
 
     /*
     ============================================================
@@ -637,48 +784,24 @@
     */
 
     let msalInstance = null;
-
     let executorAccount = null;
-
     let msalReady = false;
-
 
     /*
     ============================================================
     DATOS DE LA URL
-    ============================================================
 
-    IMPORTANTE:
-
-    Los datos originales deben venir en:
-
+    IMPORTANTE: los datos originales deben venir en
     confirmar.html?id=XXX&nombre=XXX&email=XXX&fecha=XXX
-
     El #code=... que añade Microsoft NO contiene esos parámetros.
     ============================================================
     */
 
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-
-    const targetUserId =
-        params.get("id");
-
-
-    const targetUserName =
-        params.get("nombre");
-
-
-    const targetUserEmail =
-        params.get("email");
-
-
-    const targetTerminationDate =
-        params.get("fecha");
-
+    const params = new URLSearchParams(window.location.search);
+    const targetUserId = params.get("id");
+    const targetUserName = params.get("nombre");
+    const targetUserEmail = params.get("email");
+    const targetTerminationDate = params.get("fecha");
 
     /*
     ============================================================
@@ -687,28 +810,16 @@
     */
 
     function mostrarDatosUsuario() {
-
-        document.getElementById("userName").textContent =
-            targetUserName ||
-            "No especificado";
-
-
-        document.getElementById("userEmail").textContent =
-            targetUserEmail ||
-            "No especificado";
-
-
-        document.getElementById("userId").textContent =
-            targetUserId ||
-            "No especificado";
-
-
-        document.getElementById("terminationDate").textContent =
-            targetTerminationDate ||
-            "Pendiente";
-
+        function setValue(id, value, fallback) {
+            const el = document.getElementById(id);
+            el.textContent = value || fallback;
+            el.classList.toggle("is-empty", !value);
+        }
+        setValue("userName", targetUserName, "No especificado");
+        setValue("userEmail", targetUserEmail, "No especificado");
+        setValue("userId", targetUserId, "No especificado");
+        setValue("terminationDate", targetTerminationDate, "Pendiente");
     }
-
 
     /*
     ============================================================
@@ -717,24 +828,10 @@
     */
 
     function mostrarUsuarioEjecutor(account) {
-
-        if (!account) {
-            return;
-        }
-
-
-        document.getElementById("executorName").textContent =
-            account.name ||
-            account.username ||
-            "Usuario";
-
-
-        document.getElementById("executorEmail").textContent =
-            account.username ||
-            "";
-
+        if (!account) return;
+        document.getElementById("executorName").textContent = account.name || account.username || "Usuario";
+        document.getElementById("executorEmail").textContent = account.username || "";
     }
-
 
     /*
     ============================================================
@@ -743,28 +840,14 @@
     */
 
     function mostrarError(elementId, mensaje) {
-
-        const element =
-            document.getElementById(elementId);
-
-
+        const element = document.getElementById(elementId);
         if (!element) {
-
             console.error(mensaje);
-
             return;
-
         }
-
-
-        element.textContent =
-            mensaje;
-
-
+        element.textContent = mensaje;
         element.classList.remove("hidden");
-
     }
-
 
     /*
     ============================================================
@@ -773,55 +856,25 @@
     */
 
     async function inicializarMSAL() {
-
         console.log("Inicializando MSAL...");
-
-        console.log(
-            "typeof msal:",
-            typeof msal
-        );
-
+        console.log("typeof msal:", typeof msal);
 
         if (typeof msal === "undefined") {
-
-            throw new Error(
-                "MSAL no está cargado. " +
-                "El navegador no ha podido cargar la librería de Microsoft."
-            );
-
+            throw new Error("MSAL no está cargado. El navegador no ha podido cargar la librería de Microsoft.");
         }
 
-
-        msalInstance =
-            new msal.PublicClientApplication(
-                msalConfig
-            );
-
+        msalInstance = new msal.PublicClientApplication(msalConfig);
 
         /*
-         * MSAL 2.35 requiere initialize()
-         * antes de utilizar la instancia.
+         * MSAL 2.35 requiere initialize() antes de utilizar la instancia.
          */
-
-        if (
-            typeof msalInstance.initialize ===
-            "function"
-        ) {
-
+        if (typeof msalInstance.initialize === "function") {
             await msalInstance.initialize();
-
         }
 
-
         msalReady = true;
-
-
-        console.log(
-            "✅ MSAL inicializado correctamente."
-        );
-
+        console.log("✅ MSAL inicializado correctamente.");
     }
-
 
     /*
     ============================================================
@@ -830,141 +883,56 @@
     */
 
     async function procesarRespuestaMSAL() {
+        if (!msalInstance) return;
 
-        if (!msalInstance) {
-            return;
-        }
-
-
-        console.log(
-            "Procesando respuesta MSAL..."
-        );
-
+        console.log("Procesando respuesta MSAL...");
 
         try {
-
-            const response =
-                await msalInstance.handleRedirectPromise();
-
+            const response = await msalInstance.handleRedirectPromise();
 
             if (response) {
-
-                console.log(
-                    "✅ Login completado mediante redirect.",
-                    response.account
-                );
-
-
-                executorAccount =
-                    response.account;
-
-
+                console.log("✅ Login completado mediante redirect.", response.account);
+                executorAccount = response.account;
                 if (executorAccount) {
-
-                    msalInstance.setActiveAccount(
-                        executorAccount
-                    );
-
+                    msalInstance.setActiveAccount(executorAccount);
                 }
-
             }
 
-
             /*
-             * Si no hay respuesta nueva, comprobar
-             * si ya existe una cuenta en sesión.
+             * Si no hay respuesta nueva, comprobar si ya existe una cuenta en sesión.
              */
-
             if (!executorAccount) {
-
-                const accounts =
-                    msalInstance.getAllAccounts();
-
-
-                if (
-                    accounts &&
-                    accounts.length > 0
-                ) {
-
-                    executorAccount =
-                        accounts[0];
-
-
-                    msalInstance.setActiveAccount(
-                        executorAccount
-                    );
-
+                const accounts = msalInstance.getAllAccounts();
+                if (accounts && accounts.length > 0) {
+                    executorAccount = accounts[0];
+                    msalInstance.setActiveAccount(executorAccount);
                 }
-
             }
 
-
             /*
-             * Si tenemos usuario autenticado,
-             * mostrar directamente la pantalla
-             * de confirmación.
+             * Si tenemos usuario autenticado, mostrar directamente
+             * la pantalla de confirmación.
              */
-
             if (executorAccount) {
-
-                mostrarUsuarioEjecutor(
-                    executorAccount
-                );
-
-
+                mostrarUsuarioEjecutor(executorAccount);
                 mostrarDatosUsuario();
 
-
-                document
-                    .getElementById("loginSection")
-                    .classList.add("hidden");
-
-
-                document
-                    .getElementById("confirmationSection")
-                    .classList.remove("hidden");
-
+                document.getElementById("loginSection").classList.add("hidden");
+                document.getElementById("confirmationSection").classList.remove("hidden");
 
                 /*
-                 * Limpiamos el hash #code=...
-                 * de la barra del navegador.
+                 * Limpiamos el hash #code=... de la barra del navegador.
                  */
-
-                if (
-                    window.location.hash
-                ) {
-
-                    window.history.replaceState(
-                        {},
-                        document.title,
-                        window.location.pathname +
-                        window.location.search
-                    );
-
+                if (window.location.hash) {
+                    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
                 }
-
             }
-
         }
-
         catch (error) {
-
-            console.error(
-                "❌ ERROR PROCESANDO RESPUESTA MSAL:",
-                error
-            );
-
-
-            mostrarError(
-                "loginError",
-                "Microsoft ha devuelto un error de autenticación: " +
-                error.message
-            );
-
+            console.error("❌ ERROR PROCESANDO RESPUESTA MSAL:", error);
+            mostrarError("loginError", "Microsoft ha devuelto un error de autenticación: " + error.message);
         }
-
     }
-
 
     /*
     ============================================================
@@ -973,85 +941,39 @@
     */
 
     async function login() {
-
         console.log("====================================");
         console.log("INICIANDO LOGIN");
         console.log("====================================");
 
-
-        const loginButton =
-            document.getElementById(
-                "loginButton"
-            );
-
+        const loginButton = document.getElementById("loginButton");
 
         try {
-
             if (!msalReady) {
-
                 await inicializarMSAL();
-
             }
 
-
             /*
-             * Desactivar botón para evitar
-             * dobles clics.
+             * Desactivar botón para evitar dobles clics.
              */
-
             loginButton.disabled = true;
-
-            loginButton.textContent =
-                "REDIRIGIENDO A MICROSOFT...";
-
+            loginButton.textContent = "REDIRIGIENDO A MICROSOFT...";
 
             /*
-             * IMPORTANTE:
-             *
-             * NO usamos loginPopup().
-             *
-             * Usamos loginRedirect().
-             *
-             * Microsoft autenticará al usuario
-             * y volverá a esta misma página.
+             * IMPORTANTE: NO usamos loginPopup(). Usamos loginRedirect().
+             * Microsoft autenticará al usuario y volverá a esta misma página.
              */
-
             await msalInstance.loginRedirect({
-
-                scopes: [
-                    "User.Read"
-                ],
-
+                scopes: ["User.Read"],
                 prompt: "select_account"
-
             });
-
         }
-
         catch (error) {
-
-            console.error(
-                "❌ ERROR LOGIN:",
-                error
-            );
-
-
+            console.error("❌ ERROR LOGIN:", error);
             loginButton.disabled = false;
-
-            loginButton.textContent =
-                "INICIAR SESIÓN CON MICROSOFT 365";
-
-
-            mostrarError(
-                "loginError",
-                "No se ha podido iniciar sesión con Microsoft 365. " +
-                error.message
-            );
-
+            loginButton.textContent = "INICIAR SESIÓN CON MICROSOFT 365";
+            mostrarError("loginError", "No se ha podido iniciar sesión con Microsoft 365. " + error.message);
         }
-
     }
-
 
     /*
     ============================================================
@@ -1060,183 +982,67 @@
     */
 
     async function confirmarBaja() {
+        const confirmar = window.confirm(
+            "¿Estás seguro de que quieres proceder con la baja?\n\n" +
+            "Usuario: " + (targetUserName || "No especificado") + "\n" +
+            "Correo: " + (targetUserEmail || "No especificado") + "\n\n" +
+            "Esta acción deshabilitará la cuenta en Microsoft Entra ID."
+        );
 
-        const confirmar =
-            window.confirm(
+        if (!confirmar) return;
 
-                "¿Estás seguro de que quieres proceder con la baja?\n\n" +
-
-                "Usuario: " +
-                (
-                    targetUserName ||
-                    "No especificado"
-                ) +
-
-                "\n" +
-
-                "Correo: " +
-                (
-                    targetUserEmail ||
-                    "No especificado"
-                ) +
-
-                "\n\n" +
-
-                "Esta acción deshabilitará la cuenta en Microsoft Entra ID."
-
-            );
-
-
-        if (!confirmar) {
-
-            return;
-
-        }
-
-
-        const confirmButton =
-            document.getElementById(
-                "confirmButton"
-            );
-
-
-        const cancelButton =
-            document.getElementById(
-                "cancelButton"
-            );
-
+        const confirmButton = document.getElementById("confirmButton");
+        const cancelButton = document.getElementById("cancelButton");
 
         confirmButton.disabled = true;
-
         cancelButton.disabled = true;
 
-
-        document
-            .getElementById("confirmationSection")
-            .classList.add("hidden");
-
-
-        document
-            .getElementById("loadingSection")
-            .classList.remove("hidden");
-
+        document.getElementById("confirmationSection").classList.add("hidden");
+        document.getElementById("loadingSection").classList.remove("hidden");
 
         try {
-
             /*
             ====================================================
             POWER AUTOMATE
             ====================================================
-
-            PEGA AQUÍ LA URL DEL TRIGGER HTTP
-            DE POWER AUTOMATE.
+            PEGA AQUÍ LA URL DEL TRIGGER HTTP DE POWER AUTOMATE.
             */
 
-            const POWER_AUTOMATE_URL =
-                "PON_AQUI_LA_URL_DE_POWER_AUTOMATE";
+            const POWER_AUTOMATE_URL = "PON_AQUI_LA_URL_DE_POWER_AUTOMATE";
 
-
-            if (
-                POWER_AUTOMATE_URL ===
-                "PON_AQUI_LA_URL_DE_POWER_AUTOMATE"
-            ) {
-
-                throw new Error(
-                    "Todavía no se ha configurado la URL de Power Automate."
-                );
-
+            if (POWER_AUTOMATE_URL === "PON_AQUI_LA_URL_DE_POWER_AUTOMATE") {
+                throw new Error("Todavía no se ha configurado la URL de Power Automate.");
             }
-
 
             if (!executorAccount) {
-
-                throw new Error(
-                    "No existe un usuario ejecutor autenticado."
-                );
-
+                throw new Error("No existe un usuario ejecutor autenticado.");
             }
 
-
-            const executorName =
-                executorAccount.name ||
-                "";
-
-
-            const executorEmail =
-                executorAccount.username ||
-                "";
-
+            const executorName = executorAccount.name || "";
+            const executorEmail = executorAccount.username || "";
 
             const datosBaja = {
-
-                targetUserId:
-                    targetUserId,
-
-                targetUserName:
-                    targetUserName,
-
-                targetUserEmail:
-                    targetUserEmail,
-
-                terminationDate:
-                    targetTerminationDate,
-
-                executorName:
-                    executorName,
-
-                executorEmail:
-                    executorEmail
-
+                targetUserId: targetUserId,
+                targetUserName: targetUserName,
+                targetUserEmail: targetUserEmail,
+                terminationDate: targetTerminationDate,
+                executorName: executorName,
+                executorEmail: executorEmail
             };
 
+            console.log("Enviando datos a Power Automate:", datosBaja);
 
-            console.log(
-                "Enviando datos a Power Automate:",
-                datosBaja
-            );
+            const response = await fetch(POWER_AUTOMATE_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datosBaja)
+            });
 
-
-            const response =
-                await fetch(
-
-                    POWER_AUTOMATE_URL,
-
-                    {
-
-                        method: "POST",
-
-                        headers: {
-
-                            "Content-Type":
-                                "application/json"
-
-                        },
-
-                        body:
-                            JSON.stringify(
-                                datosBaja
-                            )
-
-                    }
-
-                );
-
-
-            console.log(
-                "Respuesta Power Automate:",
-                response.status
-            );
-
+            console.log("Respuesta Power Automate:", response.status);
 
             if (!response.ok) {
-
-                throw new Error(
-                    "Power Automate ha devuelto HTTP " +
-                    response.status
-                );
-
+                throw new Error("Power Automate ha devuelto HTTP " + response.status);
             }
-
 
             /*
             ====================================================
@@ -1244,66 +1050,24 @@
             ====================================================
             */
 
-            document
-                .getElementById("loadingSection")
-                .classList.add("hidden");
+            document.getElementById("loadingSection").classList.add("hidden");
+            document.getElementById("successSection").classList.remove("hidden");
 
-
-            document
-                .getElementById("successSection")
-                .classList.remove("hidden");
-
-
-            document
-                .getElementById("successUser")
-                .textContent =
-
-                targetUserName ||
-                targetUserEmail ||
-                "Usuario";
-
-
-            document
-                .getElementById("successExecutor")
-                .textContent =
-
-                executorEmail;
-
+            document.getElementById("successUser").textContent = targetUserName || targetUserEmail || "Usuario";
+            document.getElementById("successExecutor").textContent = executorEmail;
         }
-
         catch (error) {
+            console.error("❌ ERROR EJECUTANDO BAJA:", error);
 
-            console.error(
-                "❌ ERROR EJECUTANDO BAJA:",
-                error
-            );
-
-
-            document
-                .getElementById("loadingSection")
-                .classList.add("hidden");
-
-
-            document
-                .getElementById("confirmationSection")
-                .classList.remove("hidden");
-
+            document.getElementById("loadingSection").classList.add("hidden");
+            document.getElementById("confirmationSection").classList.remove("hidden");
 
             confirmButton.disabled = false;
-
             cancelButton.disabled = false;
 
-
-            mostrarError(
-                "actionError",
-                "No se ha podido ejecutar la baja. " +
-                error.message
-            );
-
+            mostrarError("actionError", "No se ha podido ejecutar la baja. " + error.message);
         }
-
     }
-
 
     /*
     ============================================================
@@ -1312,24 +1076,12 @@
     */
 
     function cancelar() {
-
-        if (
-            window.history.length > 1
-        ) {
-
+        if (window.history.length > 1) {
             window.history.back();
-
+        } else {
+            window.location.href = "index.html";
         }
-
-        else {
-
-            window.location.href =
-                "index.html";
-
-        }
-
     }
-
 
     /*
     ============================================================
@@ -1337,108 +1089,42 @@
     ============================================================
     */
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        async function () {
+    document.addEventListener("DOMContentLoaded", async function () {
+        console.log("====================================");
+        console.log("INICIANDO CONFIRMAR.HTML");
+        console.log("====================================");
 
-            console.log("====================================");
-            console.log("INICIANDO CONFIRMAR.HTML");
-            console.log("====================================");
+        console.log("URL:", window.location.href);
+        console.log("Origin:", window.location.origin);
+        console.log("Redirect URI:", msalConfig.auth.redirectUri);
+        console.log("ID usuario:", targetUserId);
+        console.log("Nombre:", targetUserName);
+        console.log("Correo:", targetUserEmail);
+        console.log("Fecha:", targetTerminationDate);
+        console.log("MSAL disponible:", typeof msal);
 
+        /*
+         * Mostrar datos inmediatamente.
+         */
+        mostrarDatosUsuario();
 
-            console.log(
-                "URL:",
-                window.location.href
-            );
-
-
-            console.log(
-                "Origin:",
-                window.location.origin
-            );
-
-
-            console.log(
-                "Redirect URI:",
-                msalConfig.auth.redirectUri
-            );
-
-
-            console.log(
-                "ID usuario:",
-                targetUserId
-            );
-
-
-            console.log(
-                "Nombre:",
-                targetUserName
-            );
-
-
-            console.log(
-                "Correo:",
-                targetUserEmail
-            );
-
-
-            console.log(
-                "Fecha:",
-                targetTerminationDate
-            );
-
-
-            console.log(
-                "MSAL disponible:",
-                typeof msal
-            );
-
+        /*
+         * Comprobar MSAL.
+         */
+        try {
+            await inicializarMSAL();
 
             /*
-             * Mostrar datos inmediatamente.
+             * MUY IMPORTANTE: primero procesamos el redirect.
+             * Esto es lo que evita que el #code=... se quede sin procesar.
              */
-
-            mostrarDatosUsuario();
-
-
-            /*
-             * Comprobar MSAL.
-             */
-
-            try {
-
-                await inicializarMSAL();
-
-                /*
-                 * MUY IMPORTANTE:
-                 *
-                 * Primero procesamos el redirect.
-                 *
-                 * Esto es lo que evita que el #code=...
-                 * se quede sin procesar.
-                 */
-
-                await procesarRespuestaMSAL();
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    "❌ ERROR INICIALIZANDO MSAL:",
-                    error
-                );
-
-
-                mostrarError(
-                    "loginError",
-                    error.message
-                );
-
-            }
-
+            await procesarRespuestaMSAL();
         }
-    );
+        catch (error) {
+            console.error("❌ ERROR INICIALIZANDO MSAL:", error);
+            mostrarError("loginError", error.message);
+        }
+    });
 
 </script>
 
